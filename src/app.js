@@ -156,6 +156,7 @@ const introTemplate = {
     </div>`
 };
 
+
 const cardInfoTemplate = {
     props: ['subtitle', 'element'],
     template:`
@@ -290,7 +291,7 @@ let circle;
 
 // init vue-leaflet
 
-const Map = {
+const MapTemplate = {
     template: `
         <div>
             <leaflet-sidebar ref="sidebar" :sourceData="cardContent" @clearMap="removeClickedMarker()" @searchResult="onSearchResultReception"></leaflet-sidebar>
@@ -405,6 +406,9 @@ const Map = {
         maskLayer() {
             return L.layerGroup({ className: 'mask-layer' }).addTo(this.map);
         },
+        labelLayer() {
+            return L.layerGroup({ className: 'label-layer' }).addTo(this.map);
+        }
     },
     mounted() {
         if(tab) {
@@ -507,7 +511,7 @@ const Map = {
                         }
                     }).addTo(map);
 
-                    const labelGeom = res[5]
+                    const labelGeom = res[3]
 
                     geom_dep = new L.GeoJSON(res[0], this.geojson.options).addTo(map);
 
@@ -520,7 +524,7 @@ const Map = {
                         }
                     }).addTo(this.backgroundLayer)
 
-                    labelReg = new L.GeoJSON(labelGeom, {
+                    const labelReg = new L.GeoJSON(labelGeom, {
                         pointToLayer: function (feature, latlng) {
                           return L.marker(latlng,{
                             icon:createLabelIcon("labelClassReg", feature.properties.libgeom),
@@ -533,10 +537,10 @@ const Map = {
                         },
                         className:"regLabels",
                         rendererFactory: L.canvas()
-                      }).addTo(map);
+                      }).addTo(this.labelLayer);
 
             
-                    labelDep = new L.GeoJSON(labelGeom, {
+                    const labelDep = new L.GeoJSON(labelGeom, {
                         pointToLayer: function (feature, latlng) {
                           return L.marker(latlng,{
                             icon:createLabelIcon("labelClassDep", feature.properties.libgeom),
@@ -550,19 +554,18 @@ const Map = {
                         rendererFactory: L.canvas()
                       });
 
-                      map.on('zoomend', function() {
-                        let zoom = map.getZoom();
+                    //   map.on('zoomend', function() {
+                    //     let zoom = map.getZoom();
             
-                        switch (true) {
-                          case zoom < 8 :
-                            labelDep.remove()
-                            break;
-                          case zoom >= 8 && zoom < 9:
-                            labelDep.addTo(map);
-                            break;
-                        }
-                      });
-
+                    //     switch (true) {
+                    //       case zoom < 8 :
+                    //         labelDep.removeFrom(this.labelLayer)
+                    //         break;
+                    //       case zoom >= 8 && zoom < 9:
+                    //         labelDep.addTo(this.labelLayer);
+                    //         break;
+                    //     }
+                    //   });
                     };
                     function createLabelIcon(labelClass,labelText) {
                         return L.divIcon({
@@ -627,7 +630,7 @@ const Map = {
 const vm = new Vue({
     el: '#app',
     components: {
-        'leaflet-map': Map,
+        'leaflet-map': MapTemplate,
         'loading':Loading
     },
     data() {
