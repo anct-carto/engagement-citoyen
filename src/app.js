@@ -294,7 +294,7 @@ let circle;
 const MapTemplate = {
     template: `
         <div>
-            <leaflet-sidebar ref="sidebar" :sourceData="cardContent" @clearMap="removeClickedMarker()" @searchResult="onSearchResultReception"></leaflet-sidebar>
+            <leaflet-sidebar ref="sidebar" :sourceData="cardContent" @clearMap="clearMap()" @searchResult="onSearchResultReception"></leaflet-sidebar>
             <div id="mapid"></div>
         </div>`,
     data() {
@@ -423,6 +423,11 @@ const MapTemplate = {
         };
         this.loadDepGeom(); // load dep geojson
         this.checkPageStatus(); // remove loading spinner and load data
+
+        this.map.on("click",(e) => {
+            event.stopPropagation();
+            // this.clearMap()
+        })
     },
     methods: {
         onClick(i) {
@@ -448,14 +453,14 @@ const MapTemplate = {
             this.maskLayer.clearLayers();
             this.map.flyTo([e.latitude, e.longitude], 10, {duration: 1});
         },
-        removeClickedMarker() {
+        clearMap() {
             this.cardContent = '';
             this.pinLayer.clearLayers();
             this.maskLayer.clearLayers();
             this.map.flyTo(this.mapOptions.center, this.mapOptions.zoom, { duration: 1});
         },
         flyToBoundsWithOffset(layer) {
-            offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
+            let offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
             this.map.flyToBounds(layer, { paddingTopLeft: [offset, 0] });
         },
         checkPageStatus() {
@@ -567,17 +572,6 @@ const MapTemplate = {
                     //     }
                     //   });
                     };
-                    function createLabelIcon(labelClass,labelText) {
-                        return L.divIcon({
-                        className: svgText(labelClass),
-                        html: svgText(labelText)
-                    })
-                    function svgText(txt) {
-                        return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><text x="0" y = "10">'
-                                + txt + '</text></svg>';
-                    }
-                      
-                }
             }).catch((err) => {
                 console.log(err);
               });;
@@ -586,37 +580,36 @@ const MapTemplate = {
             Papa.parse(data_url, {
                 download: true,
                 header: true,
-                complete: (results) => this.fetchSpreadsheetData(results.data)
+                complete: (results) => this.joinDataOnGeom(results.data)
             });
         },
-        fetchSpreadsheetData(res) {
+        joinDataOnGeom(res) {
             fetch("data/geom_com2020.geojson")
-                .then(res => res.json())
-                .then(com_geom => {
-                    com_geom = com_geom.features;            
-                    // 1/ filtre
-                    com_geom = com_geom.filter(e => {
-                        if(res.filter(f => f.insee_com == e.properties.insee_com).length >0) {
-                            return e
-                        }
-                    });
-                    // 2 jointure
-                    com_geom.forEach(e => {
-                        res.forEach(d => {
-                            if(e.properties.insee_com == d.insee_com) {
-                                for (var key of Object.keys(d)) {
-                                    e.properties[key] = d[key]
-                                }
+            .then(res => res.json())
+            .then(com_geom => {
+                com_geom = com_geom.features;            
+                // 1/ filtre
+                com_geom = com_geom.filter(e => {
+                    if(res.filter(f => f.insee_com == e.properties.insee_com).length >0) {
+                        return e
+                    }
+                });
+                // 2 jointure
+                com_geom.forEach(e => {
+                    res.forEach(d => {
+                        if(e.properties.insee_com == d.insee_com) {
+                            for (var key of Object.keys(d)) {
+                                e.properties[key] = d[key]
                             }
-                        })
-                    });
-                    // 3 tableau final
-                    com_geom.forEach(e => spreadsheet_res.push(e.properties))
-                    sessionStorage.setItem("session_data", JSON.stringify(spreadsheet_res))
-                    page_status = "loaded";
+                        }
+                    })
+                });
+                // 3 tableau final
+                com_geom.forEach(e => spreadsheet_res.push(e.properties))
+                sessionStorage.setItem("session_data", JSON.stringify(spreadsheet_res))
+                page_status = "loaded";
             });
         }
-
     },
 }
 
@@ -646,9 +639,11 @@ const vm = new Vue({
 
 // ****************************************************************************
 // ****************************************************************************
-// fonctions
 
 
+// Fonctions universelles (utiles dans tous les projets)
+
+// empêcher déplacement sur la carte
 function preventDrag(div, map) {
     // Disable dragging when user's cursor enters the element
     div.getContainer().addEventListener('mouseover', function () {
@@ -660,3 +655,15 @@ function preventDrag(div, map) {
         map.dragging.enable();
     });
 };
+
+// création d'étiquette de repères (chef lieux par ex) 
+function createLabelIcon(labelClass,labelText) {
+    return L.divIcon({
+        className: svgText(labelClass),
+        html: svgText(labelText)
+    })
+}
+function svgText(txt) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><text x="0" y = "10">'
+        + txt + '</text></svg>';
+}
