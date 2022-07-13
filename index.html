@@ -8,7 +8,7 @@
     <!-- line awesome (pictos) -->
     <link rel="stylesheet" href="lib/line-awesome-1.3.0/css/line-awesome.min.css">
     <!-- leaflet et leaflet extensions -->
-    <link rel="stylesheet" href="lib/leaflet.css" />
+    <link rel="stylesheet" href="lib/leaflet-1.8/leaflet.css" />
     <link rel="stylesheet" href="lib/leaflet-sidebar.min.css">
     <link rel="stylesheet" href="lib/leaflet.fullscreen.css" />
     <link rel="stylesheet" href="css/font.css">
@@ -16,7 +16,7 @@
     <!-- CHARGEMENT LIBRAIRIES -->
     <script src="lib/vue.js"></script>
     <!-- leaflet et extensions -->
-    <script src="lib/leaflet.js"></script>
+    <script src="lib/leaflet-1.8/leaflet.js"></script>
     <script src="lib/leaflet-sidebar.min.js"></script>
     <script src="lib/Leaflet.fullscreen.min.js"></script>
     <!-- pdf -->
@@ -29,8 +29,9 @@
 <body>
     <!-- coucous -->
     <div id="app">
-        <loading v-if="loaded=='loaded'"></loading>
-        <leaflet-map ref = "map"></leaflet-map>
+        <app></app>
+        <!-- <loading v-if="loaded=='loaded'"></loading>
+        <leaflet-map ref = "map"></leaflet-map> -->
     </div>
     <script src="src/app.js"></script>
 </body>

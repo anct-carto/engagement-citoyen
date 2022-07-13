@@ -33,6 +33,7 @@ const Loading = {
 
 // ****************************************************************************
 
+// composant "barre de recherche"
 const searchBar = {
     template: `
             <div id="search-bar-container">
@@ -148,47 +149,53 @@ const searchBar = {
     },
 };
 
+// ****************************************************************************
 
+// composants texte d'introduction
 const introTemplate = {
     template: `
     <div>
-        introduction
+    introduction
     </div>`
 };
 
 
+// composants fiche information
 const cardInfoTemplate = {
-    props: ['subtitle', 'element'],
     template:`
         <p v-if="element">
             <span class="subtitle">{{ subtitle }}</span><br>
             <span class="element">{{ element }}</span><br>
         </p>
     `,
+    props: ['subtitle', 'element'],
 };
 
-
+// obs = observation
 const cardTemplate = {
     template:`
         <div class="card">
             <div class= "card-header">
-                <span>{{ pvd.lib_com }} ({{ pvd.insee_dep }})</span>
+                <span>{{ obs.lib_com }} ({{ obs.insee_dep }})</span>
             </div>
             <div class= "card-body">
-                <info subtitle="Nombre d'habitants en 2017" :element="pvd.pop"></info>
-                <info subtitle="Département" :element="pvd.lib_dep + ' (' + pvd.insee_dep + ')'"></info>
-                <info subtitle="Région" :element="pvd.lib_reg"></info>
-                <info subtitle="EPCI" :element="pvd.lib_epci"></info>
+                <info subtitle="Nombre d'habitants en 2017" :element="obs.pop"></info>
+                <info subtitle="Département" :element="obs.lib_dep + ' (' + obs.insee_dep + ')'"></info>
+                <info subtitle="Région" :element="obs.lib_reg"></info>
+                <info subtitle="EPCI" :element="obs.lib_epci"></info>
             </div>
         </div>`,
-    props: ['pvd'],
+    props: ['obs'],
     components: {
         'info':cardInfoTemplate,
     }
 };
 
+// ****************************************************************************
 
-const Sidebar = {
+// composant sidebar
+
+const SidebarTemplate = {
     template: ` 
     <div id="sidebar" class="leaflet-sidebar collapsed">
         <!-- nav tabs -->
@@ -217,10 +224,10 @@ const Sidebar = {
                     <text-intro></text-intro>
                 </div>
                 <div>
-                    <card :pvd="cardContent" v-if="show"></card><br>
+                    <card :obs="cardContent" v-if="show"></card><br>
                     <button id="back-btn" type="button" class="btn btn-primary" v-if="show" @click="onClick">
-                        <i class="la la-chevron-left"></i>
-                        Retour à l'accueil
+                        <i class="las la-chevron-left"></i>
+                        Retour
                     </button>
                 </div>
             </div>
@@ -236,13 +243,13 @@ const Sidebar = {
                 </a>
                 <p>
                     <b>Source et administration des données :</b>
-                    ANCT, programme Petites villes de demain
+                    ANCT
                 </p>
                 <p>
                     <b>Réalisation  et maintenance de l'outil :</b>
                     ANCT, pôle Analyse & diagnostics territoriaux - <a href = 'https://cartotheque.anct.gouv.fr/cartes' target="_blank">Service cartographie</a>
                 </p>
-                <p>Technologies utilisées : Leaflet, Bootstrap, VueJS</p>
+                <p>Technologies utilisées : Leaflet, Bootstrap, Vue.js 2.7</p>
                 <p>Le code source de cet outil est libre et consultable sur <a href="https://www.github.com/anct-carto/pvd" target="_blank">Github</a>.</p>
             </div>
         </div>
@@ -267,14 +274,12 @@ const Sidebar = {
     watch: {
         sourceData() {
             this.cardContent = this.sourceData;
-            if(this.sourceData) {
-                this.show = true;
-            }
+            this.sourceData != null ? this.show = true : this.show = false
         },
     },
     methods: {
         onClick() {
-            this.cardContent = '';
+            this.cardContent = null;
             this.show = !this.show;
             this.$emit("clearMap", true) // tell parent to remove clicked marker layer
         },
@@ -289,12 +294,18 @@ let circle;
 
 
 
-// init vue-leaflet
+// ****************************************************************************
+
+// composant carte avec interactions associées
 
 const MapTemplate = {
     template: `
         <div>
-            <leaflet-sidebar ref="sidebar" :sourceData="cardContent" @clearMap="clearMap()" @searchResult="onSearchResultReception"></leaflet-sidebar>
+            <sidebar ref="sidebar" 
+                :sourceData="cardContent" 
+                @clearMap="clearMap()" 
+                @searchResult="onSearchResultReception">
+            </sidebar>
             <div id="mapid"></div>
         </div>`,
     data() {
@@ -308,28 +319,21 @@ const MapTemplate = {
                 preferCanvas: true,
                 zoomControl:false
             },
-            data:null,
-            circleMarkerOptions: {
-                radius:7,
-                fillColor:"#e57d40",
-                fillOpacity:.9,
-                color:"white",
-                weight:1.5
+            sidebarOptions: {
+                autopan: true,
+                closeButton: true, 
+                container: "sidebar", 
+                position: "left" 
             },
-            tooltipOptions: {
-                direction:"top",
-                sticky:true,
-                className:'leaflet-tooltip'
-            },
-            clickedMarker:{
-                latlng:null,
-                tooltip:null,
-                tooltipOptions:{
-                    permanent:true, 
-                    direction:"top", 
-                    className:'leaflet-tooltip-clicked'
+            markerStyle: {
+                default:{
+                    radius:6,
+                    fillColor:"grey",
+                    fillOpacity:.9,
+                    color:"white",
+                    weight:1    
                 },
-                options: {
+                clicked:{
                     radius:10,
                     fillOpacity:1,
                     fillColor:"#e57d40",
@@ -338,8 +342,18 @@ const MapTemplate = {
                     weight:7,
                 }
             },
+            tooltipOptions: {
+                direction:"top",
+                sticky:true,
+                className:'leaflet-tooltip'
+            },
+            clickedMarker:{
+                tooltipOptions:{
+                    direction:"top", 
+                    className:'leaflet-tooltip-clicked'
+                },
+            },
             geojson: {
-                data:null,
                 options:{
                     style: {
                         fillColor:"#e8ded2",
@@ -355,42 +369,31 @@ const MapTemplate = {
                 colors: ['#293173','#f69000','#039d7b']
             },
             cardContent:null,
-            dep_geom:null,
-            reg_geom:null,
         }
     },
     components: {
-        'leaflet-sidebar':Sidebar,
+        'sidebar':SidebarTemplate,
     },
     computed: {
         map() {
             let map = L.map('mapid', this.mapOptions);
-            // attribution
             map.attributionControl.addAttribution("<a href = 'https://cartotheque.anct.gouv.fr/' target = '_blank'>ANCT</a>");
             
             // zoom control, fullscreen & scale bar
             L.control.zoom({position: 'topright'}).addTo(map);
-            // L.control.fullscreen({
-            //     position:'topright',
-            //     forcePseudoFullScreen:true,
-            //     title:'Afficher la carte en plein écran'
-            // }).addTo(map);
+            L.control.fullscreen({
+                position:'topright',
+                forcePseudoFullScreen:true,
+                title:'Afficher la carte en plein écran'
+            }).addTo(map);
             L.control.scale({ position: 'bottomright', imperial:false }).addTo(map);
 
             return map;            
         },
         sidebar() {
-            // sidebar
-            const sidebar = window.L.control.sidebar({
-                autopan: true,
-                closeButton: true, 
-                container: "sidebar", 
-                position: "left" 
-            }).addTo(this.map);
-
+            const sidebar = window.L.control.sidebar(this.sidebarOptions).addTo(this.map);
             // prevent drag over the sidebar and the legend
             preventDrag(sidebar, this.map);
-
             return sidebar
         },
         // calques
@@ -402,9 +405,6 @@ const MapTemplate = {
         },
         pinLayer() {
             return L.layerGroup({ className: 'pin-layer' }).addTo(this.map);
-        },
-        maskLayer() {
-            return L.layerGroup({ className: 'mask-layer' }).addTo(this.map);
         },
         labelLayer() {
             return L.layerGroup({ className: 'label-layer' }).addTo(this.map);
@@ -421,43 +421,41 @@ const MapTemplate = {
             this.init(); // load data
             console.info("Loading from drive");
         };
-        this.loadDepGeom(); // load dep geojson
+        this.loadHabillageGeom(); // load dep geojson
         this.checkPageStatus(); // remove loading spinner and load data
 
         this.map.on("click",(e) => {
             event.stopPropagation();
-            // this.clearMap()
+            this.clearMap()
         })
     },
     methods: {
         onClick(i) {
-            lib_com = i.lib_com;
+            let libgeo = i.lib_com;
             if(!marker) {
-                marker = new L.marker([i.latitude, i.longitude]);
-                circle = new L.circleMarker([i.latitude, i.longitude], this.clickedMarker.options).addTo(this.map)
-                marker.bindTooltip(lib_com, this.clickedMarker.tooltipOptions);
+                marker = new L.marker([i.latitude, i.longitude]).bindTooltip(libgeo, this.clickedMarker.tooltipOptions);
+                circle = new L.circleMarker([i.latitude, i.longitude], this.markerStyle.clicked).addTo(this.map)
+                // marker.bindTooltip(libgeo, this.clickedMarker.tooltipOptions);
             } else {
                 marker.setLatLng([i.latitude, i.longitude])
-                marker.setTooltipContent(lib_com)
+                marker.setTooltipContent(libgeo)
                 circle.setLatLng([i.latitude, i.longitude])
             };
             this.pinLayer.addLayer(marker);
             this.pinLayer.addLayer(circle);
 
-            // send value to children
+            // envoie valeur au composant "fiche"
             this.cardContent = i;
             this.sidebar.open("home");
         },
         onSearchResultReception(e) {
             this.onClick(e);
-            this.maskLayer.clearLayers();
             this.map.flyTo([e.latitude, e.longitude], 10, {duration: 1});
         },
         clearMap() {
-            this.cardContent = '';
+            this.cardContent = null;
             this.pinLayer.clearLayers();
-            this.maskLayer.clearLayers();
-            this.map.flyTo(this.mapOptions.center, this.mapOptions.zoom, { duration: 1});
+            // this.map.flyTo(this.mapOptions.center, this.mapOptions.zoom, { duration: 1});
         },
         flyToBoundsWithOffset(layer) {
             let offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
@@ -470,17 +468,18 @@ const MapTemplate = {
                 // ajout données
                 for(let i=0; i<spreadsheet_res.length; i++) {
                     e = spreadsheet_res[i];
-                    let marker = L.circleMarker([e.latitude, e.longitude],this.circleMarkerOptions)
+                    let marker = L.circleMarker([e.latitude, e.longitude],this.markerStyle.default)
                         .bindTooltip(e.lib_com, this.tooltipOptions)
                             .on("mouseover", (e) => {
-                            e.target.setStyle(this.clickedMarker.options)
+                            e.target.setStyle(this.markerStyle.clicked)
                         }).on("mouseout",(e) => {
-                            e.target.setStyle(this.circleMarkerOptions)
+                            e.target.setStyle(this.markerStyle.default)
                         }).on("click", (e) => {
+                            L.DomEvent.stopPropagation(e);
                             this.onClick(e.sourceTarget.content)
                         });
                     marker.content = e;
-                    marker.addTo(this.pointsLayer)
+                    marker.addTo(this.pointsLayer);
                 };
 
                 setTimeout(() => {
@@ -488,7 +487,7 @@ const MapTemplate = {
                 }, 150);
             };
         },
-        loadDepGeom() {
+        loadHabillageGeom() {
             promises = [];
             promises.push(fetch("data/geom_dep.geojson"));
             promises.push(fetch("data/geom_reg.geojson"));
@@ -618,21 +617,29 @@ const MapTemplate = {
 // ****************************************************************************
 // ****************************************************************************
 
-
-// instance vue
-const vm = new Vue({
-    el: '#app',
+const AppTemplate = {
+    template: 
+        `<div>
+            <loading v-if="loaded=='loaded'"></loading>
+            <leaflet-map ref = "map"></leaflet-map>
+        </div>
+    `,
     components: {
         'leaflet-map': MapTemplate,
-        'loading':Loading
+        'loading':Loading,
     },
     data() {
         return {
             loaded:page_status
         }
     },
-    methods: {
+}
 
+// instance vue
+const vm = new Vue({
+    el: '#app',
+    components: {
+        'app': AppTemplate,
     },
 });
 
