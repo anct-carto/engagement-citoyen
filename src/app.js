@@ -465,6 +465,16 @@ const MapTemplate = {
             let offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
             this.map.flyToBounds(layer, { paddingTopLeft: [offset, 0] });
         },
+        getColor(type) {
+            switch (type) {
+                case 'te':
+                    return this.styles[0]
+                case 'tec':
+                    return this.styles[1]
+                case 'cc':
+                    return this.styles[2]
+            }
+        },
         loadSourceData() {
             for(let i=0; i<spreadsheet_res.length; i++) {
                 e = spreadsheet_res[i];
