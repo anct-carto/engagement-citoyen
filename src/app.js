@@ -40,7 +40,7 @@ const searchBar = {
                 <div class="input-group">
                     <input ref = "input" class="form-control shadow-none py-2 border-right-0 border-left-0"
                             id="search-field" type="search"
-                            placeholder="Saisissez un nom de commune" 
+                            placeholder="Territoire ..." 
                             v-model="inputAdress"
                             @keyup="onKeypress($event)" 
                             @keydown.down="onKeyDown"
@@ -122,14 +122,16 @@ const searchBar = {
             this.index = -1;
         },
         onEnter() {
-            this.inputAdress = this.suggestionsList[this.index].lib_com;
-                        
-            this.suggestionsList = [];
-            this.isOpen = !this.isOpen;
-            this.index = -1;
-            
-            suggestion = this.suggestionsList[this.index];
-            this.$emit('searchResult',suggestion)
+            if(this.suggestionsList[this.index]) {
+                this.inputAdress = this.suggestionsList[this.index].lib_com;
+                            
+                this.suggestionsList = [];
+                this.isOpen = !this.isOpen;
+                this.index = -1;
+                
+                suggestion = this.suggestionsList[this.index];
+                this.$emit('searchResult',suggestion)
+            }
         },
         onClickSuggest(suggestion) {            
             // reset search
@@ -279,7 +281,7 @@ const SidebarTemplate = {
     },
     methods: {
         onClick() {
-            this.cardContent = null;
+            this.cardContent = '';
             this.show = !this.show;
             this.$emit("clearMap", true) // tell parent to remove clicked marker layer
         },
@@ -301,7 +303,8 @@ let circle;
 const MapTemplate = {
     template: `
         <div>
-            <sidebar ref="sidebar" 
+            <sidebar 
+                ref="sidebar" 
                 :sourceData="cardContent" 
                 @clearMap="clearMap()" 
                 @searchResult="onSearchResultReception">
@@ -312,7 +315,6 @@ const MapTemplate = {
         return {
             mapOptions: {
                 zoom: 6,
-                attribution: 'Fond cartographique &copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy;, contributeurs <a href="http://openstreetmap.org">OpenStreetMap</a>',
                 center: [46.413220, 1.219482],
                 zoomSnap: 0.5,
                 maxZoom:18,
@@ -369,6 +371,8 @@ const MapTemplate = {
                 colors: ['#293173','#f69000','#039d7b']
             },
             cardContent:null,
+            marker:null,
+            circle:null,
         }
     },
     components: {
@@ -435,7 +439,7 @@ const MapTemplate = {
             if(!marker) {
                 marker = new L.marker([i.latitude, i.longitude]).bindTooltip(libgeo, this.clickedMarker.tooltipOptions);
                 circle = new L.circleMarker([i.latitude, i.longitude], this.markerStyle.clicked).addTo(this.map)
-                // marker.bindTooltip(libgeo, this.clickedMarker.tooltipOptions);
+                marker.bindTooltip(libgeo, this.clickedMarker.tooltipOptions);
             } else {
                 marker.setLatLng([i.latitude, i.longitude])
                 marker.setTooltipContent(libgeo)
@@ -453,7 +457,7 @@ const MapTemplate = {
             this.map.flyTo([e.latitude, e.longitude], 10, {duration: 1});
         },
         clearMap() {
-            this.cardContent = null;
+            this.cardContent = 'null';
             this.pinLayer.clearLayers();
             // this.map.flyTo(this.mapOptions.center, this.mapOptions.zoom, { duration: 1});
         },
@@ -461,31 +465,26 @@ const MapTemplate = {
             let offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
             this.map.flyToBounds(layer, { paddingTopLeft: [offset, 0] });
         },
-        checkPageStatus() {
-            if(page_status == undefined) {
-                window.setTimeout(this.checkPageStatus,5);
-            } else {
-                // ajout données
-                for(let i=0; i<spreadsheet_res.length; i++) {
-                    e = spreadsheet_res[i];
-                    let marker = L.circleMarker([e.latitude, e.longitude],this.markerStyle.default)
-                        .bindTooltip(e.lib_com, this.tooltipOptions)
-                            .on("mouseover", (e) => {
-                            e.target.setStyle(this.markerStyle.clicked)
-                        }).on("mouseout",(e) => {
-                            e.target.setStyle(this.markerStyle.default)
-                        }).on("click", (e) => {
-                            L.DomEvent.stopPropagation(e);
-                            this.onClick(e.sourceTarget.content)
-                        });
-                    marker.content = e;
-                    marker.addTo(this.pointsLayer);
-                };
-
-                setTimeout(() => {
-                    this.sidebar.open('home');
-                }, 150);
+        loadSourceData() {
+            for(let i=0; i<spreadsheet_res.length; i++) {
+                e = spreadsheet_res[i];
+                let marker = L.circleMarker([e.latitude, e.longitude],this.markerStyle.default)
+                    .bindTooltip(e.lib_com, this.tooltipOptions)
+                        .on("mouseover", (e) => {
+                        e.target.setStyle(this.markerStyle.clicked)
+                    }).on("mouseout",(e) => {
+                        e.target.setStyle(this.markerStyle.default)
+                    }).on("click", (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        this.onClick(e.sourceTarget.content)
+                    });
+                marker.content = e;
+                marker.addTo(this.pointsLayer);
             };
+    
+            setTimeout(() => {
+                this.sidebar.open('home');
+            }, 150);
         },
         loadHabillageGeom() {
             promises = [];
@@ -581,6 +580,14 @@ const MapTemplate = {
                 header: true,
                 complete: (results) => this.joinDataOnGeom(results.data)
             });
+        },
+        checkPageStatus() {
+            if(page_status == undefined) {
+                window.setTimeout(this.checkPageStatus,5);
+            } else {
+                // ajout données
+                this.loadSourceData()
+            };
         },
         joinDataOnGeom(res) {
             fetch("data/geom_com2020.geojson")
