@@ -470,7 +470,7 @@ const MapTemplate = {
 
         this.createBasemap(); // load dep geojson
         this.checkPageStatus(); // remove loading spinner and load data
-        this.depGeom.then(e=>new L.GeoJSON(e)).then(this.map.addLayer.bind(this.map))
+        // this.depGeom.then(e=>new L.GeoJSON(e)).then(this.map.addLayer.bind(this.map))
     },
     methods: {
         async loadGeom(file) {
