@@ -379,6 +379,7 @@ const MapTemplate = {
     computed: {
         map() {
             let map = L.map('mapid', this.mapParams);
+            map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet</a>')
             map.attributionControl.addAttribution("<a href = 'https://cartotheque.anct.gouv.fr/' target = '_blank'>ANCT</a>");
             
             // zoom control, fullscreen & scale bar
