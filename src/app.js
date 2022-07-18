@@ -1,7 +1,7 @@
 /*
     Carte interactive des territoires en commnun et territoires d'engagement
     Hassen Chougar / service cartographie - ANCT
-    dependances : Leaflet v1.0.7, vue v2.7, vue-router v4.0.5, bootstrap v4.6.0, papaparse v5.3.1
+    dependances : Leaflet v1.0.8, vue v2.7, vue-router v4.0.5, bootstrap v4.6.0, papaparse v5.3.1
 */
 
 
@@ -33,8 +33,9 @@ const Loading = {
 
 // ****************************************************************************
 
+
 // composant "barre de recherche"
-const searchBar = {
+const SearchBar = {
     template: `
             <div id="search-bar-container">
                 <div class="input-group">
@@ -88,7 +89,7 @@ const searchBar = {
         document.removeEventListener("click", this.handleClickOutside);
     },
     methods: {
-        onKeypress(e) {
+        onKeypress() {
             this.isOpen = true;
             let val = this.inputAdress;
 
@@ -105,7 +106,7 @@ const searchBar = {
                 this.suggestionsList = result.slice(0,6);
             }
         },
-        onKeyUp(e) {
+        onKeyUp() {
             if (this.index > 0) {
                 this.index = this.index - 1;
             };
@@ -118,22 +119,23 @@ const searchBar = {
         onMouseover(e) {
             this.index = e;
         },
-        onMouseout(e) {
+        onMouseout() {
             this.index = -1;
         },
         onEnter() {
             if(this.suggestionsList[this.index]) {
                 this.inputAdress = this.suggestionsList[this.index].lib_com;
-                            
-                this.suggestionsList = [];
-                this.isOpen = !this.isOpen;
-                this.index = -1;
                 
                 suggestion = this.suggestionsList[this.index];
                 this.$emit('searchResult',suggestion)
+
+                this.suggestionsList = [];
+                this.isOpen = !this.isOpen;
+                this.index = -1;                
             }
         },
         onClickSuggest(suggestion) {            
+            event.stopPropagation()
             // reset search
             this.inputAdress = suggestion.lib_com;
             
@@ -154,16 +156,16 @@ const searchBar = {
 // ****************************************************************************
 
 // composants texte d'introduction
-const introTemplate = {
+const IntroTemplate = {
     template: `
     <div>
-    introduction
+        <span>introduction</span>
     </div>`
 };
 
 
 // composants fiche information
-const cardInfoTemplate = {
+const CardInfoTemplate = {
     template:`
         <p v-if="element">
             <span class="subtitle">{{ subtitle }}</span><br>
@@ -174,7 +176,7 @@ const cardInfoTemplate = {
 };
 
 // obs = observation
-const cardTemplate = {
+const CardTemplate = {
     template:`
         <div class="card">
             <div class= "card-header">
@@ -189,7 +191,7 @@ const cardTemplate = {
         </div>`,
     props: ['obs'],
     components: {
-        'info':cardInfoTemplate,
+        'info':CardInfoTemplate,
     }
 };
 
@@ -219,9 +221,9 @@ const SidebarTemplate = {
                     </span>
                 </div>
                 <div v-if="!show" class="sidebar-body">
-                    <h3>
+                    <!--<h3>
                         Carte interactive des territoires en commun et territoires d'engagement
-                    </h3>
+                    </h3>-->
                     <search-group @searchResult="getResult"></search-group><br>
                     <text-intro></text-intro>
                 </div>
@@ -257,42 +259,42 @@ const SidebarTemplate = {
         </div>
     </div>`,
     components: {
-        'search-group':searchBar,
-        card: cardTemplate,
-        'text-intro':introTemplate
+        'search-group':SearchBar,
+        card: CardTemplate,
+        'text-intro':IntroTemplate
     },
     props: ['sourceData'],
     data() {
         return {
             show:false,
-            cardContent:null,
+            cardContent:null
         }
     },
     computed: {
-        filteredList() {
-            // return this.sourceData.slice(0, this.nbResults)
-        }
+        // filteredList() {
+        //     return this.sourceData.slice(0, this.nbResults)
+        // },
     },
     watch: {
         sourceData() {
             this.cardContent = this.sourceData;
-            this.sourceData != null ? this.show = true : this.show = false
+            this.cardContent ? this.show = true : this.show = false
         },
     },
     methods: {
         onClick() {
             this.cardContent = '';
             this.show = !this.show;
+
             this.$emit("clearMap", true) // tell parent to remove clicked marker layer
+            
+            event.stopPropagation()
         },
         getResult(result) {
             this.$emit('searchResult', result)
         }
     },
 };
-
-let marker;
-let circle;
 
 
 
@@ -313,7 +315,7 @@ const MapTemplate = {
         </div>`,
     data() {
         return {
-            mapOptions: {
+            mapParams: {
                 zoom: 6,
                 center: [46.413220, 1.219482],
                 zoomSnap: 0.5,
@@ -330,7 +332,7 @@ const MapTemplate = {
             markerStyle: {
                 default:{
                     radius:6,
-                    fillColor:"grey",
+                    // fillColor:"grey",
                     fillOpacity:.9,
                     color:"white",
                     weight:1    
@@ -367,12 +369,8 @@ const MapTemplate = {
                     interactive:false
                 }
             },
-            styles: {
-                colors: ['#293173','#f69000','#039d7b']
-            },
+            styles:['#293173','#f69000','#039d7b'],
             cardContent:null,
-            marker:null,
-            circle:null,
         }
     },
     components: {
@@ -380,7 +378,7 @@ const MapTemplate = {
     },
     computed: {
         map() {
-            let map = L.map('mapid', this.mapOptions);
+            let map = L.map('mapid', this.mapParams);
             map.attributionControl.addAttribution("<a href = 'https://cartotheque.anct.gouv.fr/' target = '_blank'>ANCT</a>");
             
             // zoom control, fullscreen & scale bar
@@ -392,6 +390,13 @@ const MapTemplate = {
             }).addTo(map);
             L.control.scale({ position: 'bottomright', imperial:false }).addTo(map);
 
+            // au clic, efface la recherche
+            map.on("click",() => {
+                event.stopPropagation();
+                this.clearMap()
+            })
+
+
             return map;            
         },
         sidebar() {
@@ -400,11 +405,11 @@ const MapTemplate = {
             preventDrag(sidebar, this.map);
             return sidebar
         },
-        // calques
-        backgroundLayer() {
-            return L.layerGroup({className: 'background-layer'}).addTo(this.map)
+        // calques : habillage, marqueurs, étiquettes, marqueur sélectionné
+        baseMapLayer() {
+            return L.layerGroup({className: 'basemap-layer'}).addTo(this.map)
         },
-        pointsLayer() {
+        markersLayer() {
             return L.layerGroup({ className: 'points'}).addTo(this.map)
         },
         pinLayer() {
@@ -412,91 +417,78 @@ const MapTemplate = {
         },
         labelLayer() {
             return L.layerGroup({ className: 'label-layer' }).addTo(this.map);
-        }
+        },
     },
     mounted() {
-        if(tab) {
+        if(!tab) {
+            this.init(); // load data
+            console.info("Loading from drive");
+        } else {
             spreadsheet_res = tab;
             console.info("Loading from session storage");
             setTimeout(() => {                
                 page_status = "loaded";
             }, 300);
-        } else {
-            this.init(); // load data
-            console.info("Loading from drive");
         };
-        this.loadHabillageGeom(); // load dep geojson
-        this.checkPageStatus(); // remove loading spinner and load data
 
-        this.map.on("click",(e) => {
-            event.stopPropagation();
-            this.clearMap()
-        })
+        // fenêtre de contrôle des couches
+        L.control.layers(null,{
+            "<span style='background:red'>i</span>territoires":this.labelLayer,
+            "labels":this.markersLayer
+        },{
+            collapsed:false,
+            position:"topleft"
+        }
+        ).addTo(this.map)
+
+
+        this.createHabillage(); // load dep geojson
+        this.checkPageStatus(); // remove loading spinner and load data
     },
     methods: {
-        onClick(i) {
-            let libgeo = i.lib_com;
-            if(!marker) {
-                marker = new L.marker([i.latitude, i.longitude]).bindTooltip(libgeo, this.clickedMarker.tooltipOptions);
-                circle = new L.circleMarker([i.latitude, i.longitude], this.markerStyle.clicked).addTo(this.map)
-                marker.bindTooltip(libgeo, this.clickedMarker.tooltipOptions);
+        init() {
+            Papa.parse("data/dataset_test.csv", {
+                download: true,
+                header: true,
+                complete: (results) => this.joinDataOnGeom(results.data)
+            });
+        },
+        checkPageStatus() {
+            if(page_status == undefined) {
+                window.setTimeout(this.checkPageStatus,5);
             } else {
-                marker.setLatLng([i.latitude, i.longitude])
-                marker.setTooltipContent(libgeo)
-                circle.setLatLng([i.latitude, i.longitude])
+                // ajout données
+                this.createMarkers()
             };
-            this.pinLayer.addLayer(marker);
-            this.pinLayer.addLayer(circle);
-
-            // envoie valeur au composant "fiche"
-            this.cardContent = i;
-            this.sidebar.open("home");
         },
-        onSearchResultReception(e) {
-            this.onClick(e);
-            this.map.flyTo([e.latitude, e.longitude], 10, {duration: 1});
+        joinDataOnGeom(res) {
+            fetch("data/geom_com2020.geojson")
+            .then(res => res.json())
+            .then(com_geom => {
+                com_geom = com_geom.features;            
+                // 1/ filtre
+                com_geom = com_geom.filter(e => {
+                    if(res.filter(f => f.insee_com == e.properties.insee_com).length >0) {
+                        return e
+                    }
+                });
+                // 2 jointure
+                com_geom.forEach(e => {
+                    res.forEach(d => {
+                        if(e.properties.insee_com == d.insee_com) {
+                            for (var key of Object.keys(d)) {
+                                e.properties[key] = d[key]
+                            }
+                        }
+                    })
+                });
+                // 3 tableau final
+                com_geom.forEach(e => spreadsheet_res.push(e.properties))
+                sessionStorage.setItem("session_data", JSON.stringify(spreadsheet_res))
+                page_status = "loaded";
+            });
         },
-        clearMap() {
-            this.cardContent = 'null';
-            this.pinLayer.clearLayers();
-            // this.map.flyTo(this.mapOptions.center, this.mapOptions.zoom, { duration: 1});
-        },
-        flyToBoundsWithOffset(layer) {
-            let offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
-            this.map.flyToBounds(layer, { paddingTopLeft: [offset, 0] });
-        },
-        getColor(type) {
-            switch (type) {
-                case 'te':
-                    return this.styles[0]
-                case 'tec':
-                    return this.styles[1]
-                case 'cc':
-                    return this.styles[2]
-            }
-        },
-        loadSourceData() {
-            for(let i=0; i<spreadsheet_res.length; i++) {
-                e = spreadsheet_res[i];
-                let marker = L.circleMarker([e.latitude, e.longitude],this.markerStyle.default)
-                    .bindTooltip(e.lib_com, this.tooltipOptions)
-                        .on("mouseover", (e) => {
-                        e.target.setStyle(this.markerStyle.clicked)
-                    }).on("mouseout",(e) => {
-                        e.target.setStyle(this.markerStyle.default)
-                    }).on("click", (e) => {
-                        L.DomEvent.stopPropagation(e);
-                        this.onClick(e.sourceTarget.content)
-                    });
-                marker.content = e;
-                marker.addTo(this.pointsLayer);
-            };
-    
-            setTimeout(() => {
-                this.sidebar.open('home');
-            }, 150);
-        },
-        loadHabillageGeom() {
+        createHabillage() {
             promises = [];
             promises.push(fetch("data/geom_dep.geojson"));
             promises.push(fetch("data/geom_reg.geojson"));
@@ -526,7 +518,7 @@ const MapTemplate = {
 
                     const labelGeom = res[3]
 
-                    geom_dep = new L.GeoJSON(res[0], this.geojson.options).addTo(map);
+                    geom_dep = new L.GeoJSON(res[0], this.geojson.options).addTo(this.baseMapLayer);
 
                     geom_reg = new L.GeoJSON(res[1], {
                         interactive:false,
@@ -535,7 +527,7 @@ const MapTemplate = {
                             weight:1.25,
                             color:'white'
                         }
-                    }).addTo(this.backgroundLayer)
+                    }).addTo(this.baseMapLayer)
 
                     const labelReg = new L.GeoJSON(labelGeom, {
                         pointToLayer: function (feature, latlng) {
@@ -550,7 +542,8 @@ const MapTemplate = {
                         },
                         className:"regLabels",
                         rendererFactory: L.canvas()
-                      }).addTo(this.labelLayer);
+                      })
+                    labelReg.addTo(this.map);
 
             
                     const labelDep = new L.GeoJSON(labelGeom, {
@@ -568,14 +561,13 @@ const MapTemplate = {
                       });
 
                     //   map.on('zoomend', function() {
-                    //     let zoom = map.getZoom();
-            
+                    //     let zoom = map.getZoom();            
                     //     switch (true) {
-                    //       case zoom < 8 :
-                    //         labelDep.removeFrom(this.labelLayer)
+                    //       case zoom < 6 :
+                    //         labelDep.remove()
                     //         break;
-                    //       case zoom >= 8 && zoom < 9:
-                    //         labelDep.addTo(this.labelLayer);
+                    //       case zoom >= 6 :
+                    //         labelDep.addTo(this.map);
                     //         break;
                     //     }
                     //   });
@@ -584,48 +576,64 @@ const MapTemplate = {
                 console.log(err);
               });;
         },
-        init() {
-            Papa.parse(data_url, {
-                download: true,
-                header: true,
-                complete: (results) => this.joinDataOnGeom(results.data)
-            });
-        },
-        checkPageStatus() {
-            if(page_status == undefined) {
-                window.setTimeout(this.checkPageStatus,5);
-            } else {
-                // ajout données
-                this.loadSourceData()
+        createMarkers() {
+            for(let i=0; i<spreadsheet_res.length; i++) {
+                e = spreadsheet_res[i];
+                let marker = L.circleMarker([e.latitude, e.longitude],this.markerStyle.default)
+                    .bindTooltip(e.lib_com, this.tooltipOptions)
+                        .on("mouseover", (e) => {
+                        e.target.setStyle(this.markerStyle.clicked)
+                    }).on("mouseout",(e) => {
+                        e.target.setStyle(this.markerStyle.default)
+                        e.target.setStyle({fillColor:this.getColor(e.demarche)})
+                    }).on("click", (e) => {
+                        L.DomEvent.stopPropagation(e);
+                        this.onClick(e.sourceTarget.content)
+                    });
+                marker.content = e;
+                marker.setStyle({fillColor:this.getColor(e.demarche)})
+                marker.addTo(this.markersLayer);
             };
+    
+            setTimeout(() => {
+                this.sidebar.open('home');
+            }, 150);
         },
-        joinDataOnGeom(res) {
-            fetch("data/geom_com2020.geojson")
-            .then(res => res.json())
-            .then(com_geom => {
-                com_geom = com_geom.features;            
-                // 1/ filtre
-                com_geom = com_geom.filter(e => {
-                    if(res.filter(f => f.insee_com == e.properties.insee_com).length >0) {
-                        return e
-                    }
-                });
-                // 2 jointure
-                com_geom.forEach(e => {
-                    res.forEach(d => {
-                        if(e.properties.insee_com == d.insee_com) {
-                            for (var key of Object.keys(d)) {
-                                e.properties[key] = d[key]
-                            }
-                        }
-                    })
-                });
-                // 3 tableau final
-                com_geom.forEach(e => spreadsheet_res.push(e.properties))
-                sessionStorage.setItem("session_data", JSON.stringify(spreadsheet_res))
-                page_status = "loaded";
-            });
-        }
+        onClick(i) {
+            // 1 crée le nouveau marqueur
+            let marker = new L.marker([i.latitude, i.longitude]).bindTooltip(i.lib_com, this.tooltipOptions)
+            let circle = new L.circleMarker([i.latitude, i.longitude],this.markerStyle.clicked)
+
+            this.pinLayer.addLayer(marker);
+            this.pinLayer.addLayer(circle);
+
+            // 2 envoie valeur au composant "fiche"
+            this.cardContent = i;
+            this.sidebar.open("home");
+        },
+        onSearchResultReception(e) {
+            this.onClick(e);
+            this.map.flyTo([e.latitude, e.longitude], 10, {duration: 1});
+        },
+        clearMap() {
+            this.cardContent = null;
+            this.pinLayer.clearLayers();
+            // this.map.flyTo(this.mapParams.center, this.mapParams.zoom, { duration: 1});
+        },
+        flyToBoundsWithOffset(layer) {
+            let offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
+            this.map.flyToBounds(layer, { paddingTopLeft: [offset, 0] });
+        },
+        getColor(type) {
+            switch (type) {
+                case 'te':
+                    return this.styles[0]
+                case 'tec':
+                    return this.styles[1]
+                case 'cc':
+                    return this.styles[2]
+            }
+        },
     },
 }
 
