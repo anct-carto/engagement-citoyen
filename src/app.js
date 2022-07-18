@@ -470,12 +470,13 @@ const MapTemplate = {
 
         this.createBasemap(); // load dep geojson
         this.checkPageStatus(); // remove loading spinner and load data
-        console.log(this.depGeom);
+        this.depGeom.then(e=>new L.GeoJSON(e)).then(this.map.addLayer.bind(this.map))
     },
     methods: {
         async loadGeom(file) {
             const res = await fetch(file);
-            return await res.json()
+            const data = await res.json()
+            return data
         },
         loadData() {
             Papa.parse(data_url, {
