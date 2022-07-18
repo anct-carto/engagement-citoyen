@@ -39,7 +39,6 @@ html, body, #mapid {
 
 #loading {
 	background-color: rgba(0,0,0,.75);
-	/* font-size: 1.1em; */
 	color:white;
 	padding:100px;
 	position: absolute;
@@ -110,7 +109,7 @@ html, body, #mapid {
   }
 
 .sidebar-body {
-	margin-right: 10px;
+	/* margin-right: 10px; */
 }
 
 /* -------------------------------------------------------------------------- */
@@ -122,23 +121,23 @@ html, body, #mapid {
 	border: none !important;
 }
 
+
+
 .leaflet-tooltip {
-	top: -10px;
-	white-space:normal ;
+	/* white-space:normal ; */
 	text-align: center;
-	padding:0 -25px !important;
 	border:none !important;
-	opacity: 1;
-	background-color: var(--color-programme-second) !important;
-	color: white !important;
-	font-size:1em;
+	color: white;
 	font-family: 'abel-regular';
 	font-weight:900;
+	display: block;
+	padding:0;
 }
 
-.leaflet-tooltip-clicked {
-	left: -15px;
-	background-color: var(--color-programme-second)!important;
+.leaflet-tooltip > span {
+	display: block;
+	padding:2px 5px;
+	border-radius: 3px;
 }
 
 .leaflet-tooltip-info {
@@ -168,20 +167,6 @@ html, body, #mapid {
 
 .input-group-prepend {
 	position: relative;
-}
-
-#search-field {
-	font-size: 1.15em;
-	border-right: none;
-}
-
-.input-group-text i {
-	font-size: 1em;
-}
-
-.input-group-text {
-	width:20px;
-	padding:0 15px 0 7px;
 }
 
 

@@ -6,7 +6,8 @@
 
 
 
-const data_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOLYK3fGTi0MyoFY4iAz9zDsXFy7_t-dni9ijNBKnVZTW540K73BXDYCeUGJN80hXqCqscqX9xO19v/pub?output=csv"
+// const data_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOLYK3fGTi0MyoFY4iAz9zDsXFy7_t-dni9ijNBKnVZTW540K73BXDYCeUGJN80hXqCqscqX9xO19v/pub?output=csv"
+const data_url = "data/liste_tec_te.csv"
 let spreadsheet_res = [];
 let tab = JSON.parse(sessionStorage.getItem("session_data"));
 let page_status;
@@ -111,7 +112,7 @@ const SearchBar = {
                 this.index = this.index - 1;
             };
         },
-        onKeyDown(e) {
+        onKeyDown() {
             if (this.index < this.suggestionsList.length) {
                 this.index = this.index + 1;
             }
@@ -254,7 +255,7 @@ const SidebarTemplate = {
                     ANCT, pôle Analyse & diagnostics territoriaux - <a href = 'https://cartotheque.anct.gouv.fr/cartes' target="_blank">Service cartographie</a>
                 </p>
                 <p>Technologies utilisées : Leaflet, Bootstrap, Vue.js 2.7</p>
-                <p>Le code source de cet outil est libre et consultable sur <a href="https://www.github.com/anct-carto/pvd" target="_blank">Github</a>.</p>
+                <p>Le code source de cet outil est consultable sur <a href="https://www.github.com/anct-carto/pvd" target="_blank">Github</a>.</p>
             </div>
         </div>
     </div>`,
@@ -315,61 +316,85 @@ const MapTemplate = {
         </div>`,
     data() {
         return {
-            mapParams: {
-                zoom: 6,
-                center: [46.413220, 1.219482],
-                zoomSnap: 0.5,
-                maxZoom:18,
-                preferCanvas: true,
-                zoomControl:false
-            },
-            sidebarOptions: {
-                autopan: true,
-                closeButton: true, 
-                container: "sidebar", 
-                position: "left" 
-            },
-            markerStyle: {
-                default:{
-                    radius:6,
-                    // fillColor:"grey",
-                    fillOpacity:.9,
-                    color:"white",
-                    weight:1    
+            config:{
+                map:{
+                    zoom: 6,
+                    center: [46.413220, 1.219482],
+                    zoomSnap: 0.05,
+                    maxZoom:18,
+                    preferCanvas: true,
+                    zoomControl:false,
                 },
-                clicked:{
-                    radius:10,
-                    fillOpacity:1,
-                    fillColor:"#e57d40",
-                    color:"white",
-                    opacity:0.85,
-                    weight:7,
+                sidebar:{
+                    autopan: true,
+                    closeButton: true,
+                    container: "sidebar",
+                    position: "left",
                 }
             },
-            tooltipOptions: {
-                direction:"top",
-                sticky:true,
-                className:'leaflet-tooltip'
-            },
-            clickedMarker:{
-                tooltipOptions:{
-                    direction:"top", 
-                    className:'leaflet-tooltip-clicked'
+            symbology: {
+                styles:{
+                    labels:['TDE','TEC','CCO'],
+                    colors:['#039d7b','#f69000','#293173'],
+                },    
+                basemap:{
+                    dep:{
+                        interactive:false,
+                        style: {
+                            fillColor:"#e8ded2",
+                            fillOpacity:1,
+                            color:"white",
+                            weight:0.5,
+                            opacity:1,
+                        },
+                    },
+                    reg:{
+                        interactive:false,
+                        style: {
+                            fillOpacity:0,
+                            weight:1.25,
+                            color:'white'
+                        },
+                    },
+                    drom:{
+                        interactive:false,
+                        style: {
+                            fillOpacity:0,
+                            weight:0.5,
+                            color:'#293173'
+                        },
+                    }
                 },
-            },
-            geojson: {
-                options:{
-                    style: {
-                        fillColor:"#e8ded2",
+                markers:{
+                    default:{
+                        radius:6,
+                        fillOpacity:.9,
+                        color:"white",
+                        weight:1,
+                    },
+                    clicked:{
+                        radius:10,
                         fillOpacity:1,
                         color:"white",
-                        weight:0.5,
-                        opacity:1
+                        opacity:0.75,
+                        weight:7,
                     },
-                    interactive:false
+                },
+                tooltip:{
+                    default:{
+                        direction:"top",
+                        sticky:true,
+                        className:'leaflet-tooltip',
+                        opacity:1,
+                        offset:[0,-15],
+                        // permanent:true
+                    },
+                    clicked:{
+                        direction:"top",
+                        className:'leaflet-tooltip-clicked',
+                    },
                 }
             },
-            styles:['#293173','#f69000','#039d7b'],
             cardContent:null,
         }
     },
@@ -378,7 +403,7 @@ const MapTemplate = {
     },
     computed: {
         map() {
-            let map = L.map('mapid', this.mapParams);
+            let map = L.map('mapid', this.config.map);
             map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet</a>')
             map.attributionControl.addAttribution("<a href = 'https://cartotheque.anct.gouv.fr/' target = '_blank'>ANCT</a>");
             
@@ -397,32 +422,34 @@ const MapTemplate = {
                 this.clearMap()
             })
 
-
             return map;            
         },
         sidebar() {
-            const sidebar = window.L.control.sidebar(this.sidebarOptions).addTo(this.map);
+            const sidebar = window.L.control.sidebar(this.config.sidebar).addTo(this.map);
             // prevent drag over the sidebar and the legend
             preventDrag(sidebar, this.map);
             return sidebar
         },
         // calques : habillage, marqueurs, étiquettes, marqueur sélectionné
         baseMapLayer() {
-            return L.layerGroup({className: 'basemap-layer'}).addTo(this.map)
-        },
-        markersLayer() {
-            return L.layerGroup({ className: 'points'}).addTo(this.map)
+            return L.layerGroup({className: 'basemap-layer',interactive:false}).addTo(this.map)
         },
         pinLayer() {
             return L.layerGroup({ className: 'pin-layer' }).addTo(this.map);
         },
+        markersLayer() {
+            return L.layerGroup({ className: 'points'}).addTo(this.map)
+        },
         labelLayer() {
             return L.layerGroup({ className: 'label-layer' }).addTo(this.map);
+        },
+        depGeom() {
+            return this.loadGeom("data/geom_dep.geojson")
         },
     },
     mounted() {
         if(!tab) {
-            this.init(); // load data
+            this.loadData(); // load data
             console.info("Loading from drive");
         } else {
             spreadsheet_res = tab;
@@ -439,16 +466,19 @@ const MapTemplate = {
         },{
             collapsed:false,
             position:"topleft"
-        }
-        ).addTo(this.map)
+        }).addTo(this.map)
 
-
-        this.createHabillage(); // load dep geojson
+        this.createBasemap(); // load dep geojson
         this.checkPageStatus(); // remove loading spinner and load data
+        console.log(this.depGeom);
     },
     methods: {
-        init() {
-            Papa.parse("data/dataset_test.csv", {
+        async loadGeom(file) {
+            const res = await fetch(file);
+            return await res.json()
+        },
+        loadData() {
+            Papa.parse(data_url, {
                 download: true,
                 header: true,
                 complete: (results) => this.joinDataOnGeom(results.data)
@@ -466,17 +496,17 @@ const MapTemplate = {
             fetch("data/geom_com2020.geojson")
             .then(res => res.json())
             .then(com_geom => {
-                com_geom = com_geom.features;            
+                com_geom = com_geom.features;
                 // 1/ filtre
                 com_geom = com_geom.filter(e => {
-                    if(res.filter(f => f.insee_com == e.properties.insee_com).length >0) {
+                    if(res.filter(f => f.codgeo == e.properties.insee_com).length >0) {
                         return e
                     }
                 });
                 // 2 jointure
                 com_geom.forEach(e => {
                     res.forEach(d => {
-                        if(e.properties.insee_com == d.insee_com) {
+                        if(e.properties.insee_com == d.codgeo) {
                             for (var key of Object.keys(d)) {
                                 e.properties[key] = d[key]
                             }
@@ -489,8 +519,8 @@ const MapTemplate = {
                 page_status = "loaded";
             });
         },
-        createHabillage() {
-            promises = [];
+        createBasemap() {
+            let promises = [];
             promises.push(fetch("data/geom_dep.geojson"));
             promises.push(fetch("data/geom_reg.geojson"));
             promises.push(fetch("data/cercles_drom.geojson"));
@@ -508,27 +538,11 @@ const MapTemplate = {
                 this.geom_reg = res[1]
 
                 if(map) {
-                    cercles_drom = new L.GeoJSON(res[2], {
-                        interactive:false,
-                        style: {
-                            fillOpacity:0,
-                            weight:1,
-                            color:'white'
-                        }
-                    }).addTo(map);
+                    geom_dep = new L.GeoJSON(res[0], this.symbology.basemap.dep).addTo(this.baseMapLayer);
+                    geom_reg = new L.GeoJSON(res[1], this.symbology.basemap.reg).addTo(this.baseMapLayer);
+                    cercles_drom = new L.GeoJSON(res[2],this.symbology.basemap.drom).addTo(this.baseMapLayer);
 
                     const labelGeom = res[3]
-
-                    geom_dep = new L.GeoJSON(res[0], this.geojson.options).addTo(this.baseMapLayer);
-
-                    geom_reg = new L.GeoJSON(res[1], {
-                        interactive:false,
-                        style: {
-                            fillOpacity:0,
-                            weight:1.25,
-                            color:'white'
-                        }
-                    }).addTo(this.baseMapLayer)
 
                     const labelReg = new L.GeoJSON(labelGeom, {
                         pointToLayer: function (feature, latlng) {
@@ -545,7 +559,6 @@ const MapTemplate = {
                         rendererFactory: L.canvas()
                       })
                     labelReg.addTo(this.map);
-
             
                     const labelDep = new L.GeoJSON(labelGeom, {
                         pointToLayer: function (feature, latlng) {
@@ -561,56 +574,61 @@ const MapTemplate = {
                         rendererFactory: L.canvas()
                       });
 
-                    //   map.on('zoomend', function() {
-                    //     let zoom = map.getZoom();            
-                    //     switch (true) {
-                    //       case zoom < 6 :
-                    //         labelDep.remove()
-                    //         break;
-                    //       case zoom >= 6 :
-                    //         labelDep.addTo(this.map);
-                    //         break;
-                    //     }
-                    //   });
+                      map.on('zoomend', function() {
+                        let zoom = map.getZoom();
+                        switch (true) {
+                          case zoom < 7 :
+                            labelDep.removeFrom(map)
+                            break;
+                          case zoom >= 6 :
+                            labelDep.addTo(map);
+                            break;
+                        }
+                      });
                     };
             }).catch((err) => {
                 console.log(err);
-              });;
+            });;
         },
         createMarkers() {
+            console.log(spreadsheet_res);
             for(let i=0; i<spreadsheet_res.length; i++) {
-                e = spreadsheet_res[i];
-                let marker = L.circleMarker([e.latitude, e.longitude],this.markerStyle.default)
-                    .bindTooltip(e.lib_com, this.tooltipOptions)
-                        .on("mouseover", (e) => {
-                        e.target.setStyle(this.markerStyle.clicked)
-                    }).on("mouseout",(e) => {
-                        e.target.setStyle(this.markerStyle.default)
-                        e.target.setStyle({fillColor:this.getColor(e.demarche)})
-                    }).on("click", (e) => {
-                        L.DomEvent.stopPropagation(e);
-                        this.onClick(e.sourceTarget.content)
-                    });
+                let e = spreadsheet_res[i];
+                let marker = L.circleMarker([e.latitude, e.longitude],this.symbology.markers.default)
+                .bindTooltip(this.stylishTooltip(e),this.symbology.tooltip.default)
+                .on("mouseover", (e) => {
+                    e.target.setStyle(this.symbology.markers.clicked)
+                }).on("mouseout",(e) => {
+                    e.target.setStyle(this.symbology.markers.default)
+                    // e.target.setStyle({fillColor:this.getColor(e.demarche)})
+                }).on("click", (e) => {
+                    L.DomEvent.stopPropagation(e);
+                    this.onClick(e.sourceTarget.content)
+                });
                 marker.content = e;
-                marker.setStyle({fillColor:this.getColor(e.demarche)})
+                marker.setStyle({fillColor:this.getColor(e.demarche)});
                 marker.addTo(this.markersLayer);
             };
-    
             setTimeout(() => {
                 this.sidebar.open('home');
             }, 150);
         },
         onClick(i) {
-            // 1 crée le nouveau marqueur
-            let marker = new L.marker([i.latitude, i.longitude]).bindTooltip(i.lib_com, this.tooltipOptions)
-            let circle = new L.circleMarker([i.latitude, i.longitude],this.markerStyle.clicked)
-
-            this.pinLayer.addLayer(marker);
-            this.pinLayer.addLayer(circle);
+            // vide la couche si pleine
+            this.pinLayer.clearLayers();
+            
+            // crée un marqueur au clic
+            let glow = new L.circleMarker([i.latitude, i.longitude],this.symbology.markers.clicked).addTo(this.pinLayer);
+            let circle = new L.circleMarker([i.latitude, i.longitude],this.symbology.markers.default).addTo(this.pinLayer);
+            circle.setStyle({fillColor:this.getColor(i.demarche)});
+            glow.setStyle({fillColor:this.getColor(i.demarche)});
 
             // 2 envoie valeur au composant "fiche"
             this.cardContent = i;
             this.sidebar.open("home");
+        },
+        stylishTooltip(marker) {
+            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.lib_com}</span>`
         },
         onSearchResultReception(e) {
             this.onClick(e);
@@ -619,21 +637,17 @@ const MapTemplate = {
         clearMap() {
             this.cardContent = null;
             this.pinLayer.clearLayers();
-            // this.map.flyTo(this.mapParams.center, this.mapParams.zoom, { duration: 1});
         },
         flyToBoundsWithOffset(layer) {
             let offset = document.querySelector('.leaflet-sidebar-content').getBoundingClientRect().width;
             this.map.flyToBounds(layer, { paddingTopLeft: [offset, 0] });
         },
         getColor(type) {
-            switch (type) {
-                case 'te':
-                    return this.styles[0]
-                case 'tec':
-                    return this.styles[1]
-                case 'cc':
-                    return this.styles[2]
-            }
+            let color;
+            this.symbology.styles.labels.forEach((label,i) => {
+                if(label === type) color = this.symbology.styles.colors[i]
+            })
+            return color
         },
     },
 }
@@ -662,7 +676,7 @@ const AppTemplate = {
 }
 
 // instance vue
-const vm = new Vue({
+new Vue({
     el: '#app',
     components: {
         'app': AppTemplate,
