@@ -4,6 +4,36 @@
     dependances : Leaflet v1.0.8, vue v2.7, vue-router v4.0.5, bootstrap v4.6.0, papaparse v5.3.1
 */
 
+// Chargement données globales ****************************************************************************
+
+
+// parse csv (ou tableau issu d'un tableau partagé) en json
+function fetchCsv(data_url) {
+    return new Promise((resolve,reject) => {
+        Papa.parse(data_url, {
+            download: true,
+            header: true,
+            complete: (res) => resolve(res.data),
+            error:(err) => reject(err)
+        });
+    })
+}
+
+// charge depuis session storage ou fetch
+async function getData(path) {
+    const sessionData = JSON.parse(sessionStorage.getItem("session_data1"));
+    if(sessionData) {
+        return sessionData
+    } else {
+        try {
+            const data = await fetchCsv(path)
+            sessionStorage.setItem('session_data1',JSON.stringify(data));
+            return data
+        } catch (error) {
+            console.error(error)
+        }    
+    }
+}
 
 
 // const data_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOLYK3fGTi0MyoFY4iAz9zDsXFy7_t-dni9ijNBKnVZTW540K73BXDYCeUGJN80hXqCqscqX9xO19v/pub?output=csv"
@@ -11,7 +41,6 @@ const data_url = "data/liste_tec_te.csv"
 let spreadsheet_res = [];
 let tab = JSON.parse(sessionStorage.getItem("session_data"));
 let page_status;
-
 
 
 
@@ -56,7 +85,7 @@ const SearchBar = {
                                 @mouseover="onMouseover(i)"
                                 @mouseout="onMouseout(i)"
                                 :class="{ 'is-active': i === index }">
-                                    {{ suggestion.lib_com }} ({{ suggestion.insee_dep }})
+                                    {{ suggestion.libgeo }} ({{ suggestion.codgeo }})
                             </li>
                         </ul>
                     </div>
@@ -69,11 +98,6 @@ const SearchBar = {
             suggestionsList:[],
         }
     },
-    computed: {
-        data() {
-            return spreadsheet_res
-        }
-    },
     watch: {
         inputAdress() {
             if (!this.inputAdress) {
@@ -83,8 +107,9 @@ const SearchBar = {
             }
         }
     },
-    mounted() {
+    async mounted() {
         document.addEventListener("click", this.handleClickOutside);
+        this.data = await getData(data_url)
     },
     destroyed() {
         document.removeEventListener("click", this.handleClickOutside);
@@ -102,7 +127,7 @@ const SearchBar = {
 
             if (val != undefined && val != '') {
                 result = this.data.filter(e => {
-                    return e.lib_com.toLowerCase().includes(val.toLowerCase())
+                    return e.libgeo.toLowerCase().includes(val.toLowerCase())
                 });
                 this.suggestionsList = result.slice(0,6);
             }
@@ -125,7 +150,7 @@ const SearchBar = {
         },
         onEnter() {
             if(this.suggestionsList[this.index]) {
-                this.inputAdress = this.suggestionsList[this.index].lib_com;
+                this.inputAdress = this.suggestionsList[this.index].libgeo;
                 
                 suggestion = this.suggestionsList[this.index];
                 this.$emit('searchResult',suggestion)
@@ -138,7 +163,7 @@ const SearchBar = {
         onClickSuggest(suggestion) {            
             event.stopPropagation()
             // reset search
-            this.inputAdress = suggestion.lib_com;
+            this.inputAdress = suggestion.libgeo;
             
             this.suggestionsList = [];
             this.isOpen = !this.isOpen;
