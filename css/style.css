@@ -1,6 +1,7 @@
 :root {
 	--bleu-anct:#293173;
 	--bleu-second:#5770be;
+	--vert-anct:#00ac8c;
 	--jaune-anct:#ffe800;
 	--color-programme:rgb(156,185,77);
 	--color-programme-second:rgb(229,125,84);
@@ -85,7 +86,9 @@ html, body, #mapid {
 
 /* sidebar */
 .leaflet-sidebar-tabs {
-	background-color: #5e8000;
+	background-color: var(--vert-anct);
+	background: rgb(0,172,140);
+	background: linear-gradient(180deg, rgba(0,172,140,1) 0%, rgba(169,242,229,1) 100%); 
 	box-shadow: 2px 0px 2px 0px #656565;
 }
 
@@ -264,7 +267,8 @@ li {
 /* bouton retour */
 
 #back-btn {
-	background-color: var(--color-programme);
+	background-color: var(--jaune-anct);
+	color:black;
 	border: none;
 	font-size: .9em;
 }
