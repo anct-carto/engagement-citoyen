@@ -123,8 +123,29 @@ html, body, #mapid {
 	border-radius: 4px;
 }
 
-/* chef lieux */
+/* legend */
+.leaflet-control-layers {
+	font-size: 10px;
+}
 
+/* style checkbox */
+/* .leaflet-control-layers-overlays input[type="checkbox"] {
+	display: none;
+}
+
+.leaflet-control-layers-overlays.input[type=checkbox] + label {
+	background: url('/lib/line-awesome-1.3.0/svg/eye.svg') no-repeat;
+	display: inline-block;
+}
+
+.leaflet-control-layers-overlays.input[type=checkbox]:checked + label {
+	background: url('/lib/line-awesome-1.3.0/svg/eye-slash.svg') no-repeat;
+	display: inline-block;
+	height: 50px;
+	width: 50px;
+} */
+
+/* chef lieux */
 .leaflet-marker-pane {
 	left:-10px;
 	opacity: 0.75;
