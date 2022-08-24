@@ -208,13 +208,14 @@ const CardInfoTemplate = {
 const CardTemplate = {
     template:`
         <div class="card">
-            <div class= "card-header">
+            <div class= "card-header" :style="'color:'+obs.color">
                 <span>{{ obs.lib_com }} ({{ obs.codgeo }})</span>
             </div>
             <div class= "card-body">
                 <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
                 <info subtitle="Type de démarche engagée" :element="obs.demarche"></info>
-                <info subtitle="Région" :element="obs.lib_reg"></info>
+                <info subtitle="Période d'accompagement" :element="'A venir'"></info>
+                <info subtitle="Actions accompagnées" :element="'A venir'"></info>
                 <info subtitle="EPCI" :element="obs.lib_epci"></info>
             </div>
         </div>`,
@@ -464,7 +465,16 @@ const MapTemplate = {
         pinLayer() {
             return L.layerGroup({ className: 'pin-layer' }).addTo(this.map);
         },
-        markersLayer() {
+        // markersLayer() {
+        //     return L.layerGroup({ className: 'points'}).addTo(this.map)
+        // },
+        tecLayer() {
+            return L.layerGroup({ className: 'points'}).addTo(this.map)
+        },
+        tdeLayer() {
+            return L.layerGroup({ className: 'points'}).addTo(this.map)
+        },
+        ccoLayer() {
             return L.layerGroup({ className: 'points'}).addTo(this.map)
         },
         labelLayer() {
@@ -494,11 +504,14 @@ const MapTemplate = {
 
         // fenêtre de contrôle des couches
         L.control.layers(null,{
-            "Territoires":this.markersLayer,
+            "Territoires en commun -<br>les projets partagés":this.tecLayer,
+            "Territoires d'engagement -<br>les parcours":this.tdeLayer,
+            "Territoires d'engagement -<br>la cellule de conseil et d'orientation":this.ccoLayer,
+            // "Territoires":this.markersLayer,
             "Toponymes":this.labelLayer
         },{
-            collapsed:false,
-            position:"topright"
+            collapsed:true,
+            position:"bottomright"
         }).addTo(this.map)
 
         this.createBasemap(); // load dep geojson
@@ -632,8 +645,22 @@ const MapTemplate = {
                     this.onClick(e.target.content)
                 });
                 marker.content = props;
-                marker.setStyle({fillColor:this.getColor(props.demarche)});
-                marker.addTo(this.markersLayer);
+                marker.content.color = this.getColor(props.demarche)
+                marker.setStyle({fillColor:marker.content.color});
+                
+                // ajout au calque correspondant
+                switch (props.demarche) {
+                    case "TEC":
+                        marker.addTo(this.tecLayer);                        
+                        break;
+                    case "TDE":
+                    marker.addTo(this.tdeLayer);
+                    break;
+                    case "CCO":
+                    marker.addTo(this.ccoLayer);                        
+                    break;
+                }
+                // marker.addTo(this.markersLayer);
             };
             setTimeout(() => {
                 this.sidebar.open('home');
