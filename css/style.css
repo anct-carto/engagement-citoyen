@@ -23,6 +23,10 @@ html, body, #mapid {
 	background: white;
 }
 
+/* taille des pictos */
+body i {
+	font-size: 1.3em !important;
+}
 
 /* -------------------------------------------------------------------------- */
 /* 								SCREEN LOADING					   	 		  */													
@@ -66,15 +70,13 @@ html, body, #mapid {
 
 /* header panneau avec titre carte */
 .leaflet-sidebar-header {
-	/* background-color: var(--vert-pvd);
-	text-transform:uppercase;
-	font-family: 'Marianne-Bold';
-	display: block;
-	position: static; */
 	background: none;
-	margin:15px -5px 0 -5px;
+	font-family: 'Marianne-Bold';
+	text-transform: uppercase;
+	color:var(--vert-anct);
+	font-size: 14px;
+	margin:0px 10px 15px 5px;
 	height: auto;
-	padding-bottom: 20px;
 	z-index: 0;
 }
 
@@ -255,7 +257,6 @@ li {
 
 
 .card {
-	margin-top: 30px;
 	background-color: white;
 }
 
