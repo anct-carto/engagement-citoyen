@@ -243,15 +243,18 @@ const SidebarTemplate = {
         </div>
         <!-- panel content -->
         <div class="leaflet-sidebar-content">
+            <div class="leaflet-sidebar-header">
+                <span>
+                    Carte interactive des
+                </span>
+                <h4>
+                    territoires en commun et territoires d'engagement
+                </h4>
+                <span class="leaflet-sidebar-close" @click="sidebar.close()">
+                    <i class="la la-step-backward"></i>
+                </span>
+            </div>
             <div class="leaflet-sidebar-pane" id="home">
-                <div class="leaflet-sidebar-header">
-                    <span>
-                        Carte interactive des territoires en commun et territoires d'engagement
-                    </span>
-                    <span class="leaflet-sidebar-close">
-                        <i class="las la-step-backward"></i>
-                    </span>
-                </div>
                 <div v-if="!show" class="sidebar-body">
                     <search-group @searchResult="getResult"></search-group><br>
                     <text-intro></text-intro>
@@ -265,12 +268,6 @@ const SidebarTemplate = {
                 </div>
             </div>
             <div class="leaflet-sidebar-pane" id="a-propos">
-                <h2 class="leaflet-sidebar-header">
-                    À propos
-                    <span class="leaflet-sidebar-close">
-                        <i class="las la-step-backward"></i>
-                    </span>
-                </h2>
                 <a href="https://agence-cohesion-territoires.gouv.fr/" target="_blank">
                     <img src="img/logo_anct.png" width="100%" style = 'padding-bottom: 5%;'>
                 </a>
@@ -496,21 +493,21 @@ const MapTemplate = {
             // ... 2 charge les géométries puis ...
             this.comGeom.then(geom => {
                 // ... 3 joint les données aux géométries ...
-                let joinedData = this.joinGeom(data,geom)
+                this.joinedData = this.joinGeom(data,geom)
                 // ... 4 créée la couche sur leaflet ...
-                this.createMarkers(joinedData)
+                this.createMarkers(this.joinedData)
             })
         })
 
         // fenêtre de contrôle des couches
         L.control.layers(null,{
-            "Territoires en commun -<br>les projets partagés":this.tecLayer,
-            "Territoires d'engagement -<br>les parcours":this.tdeLayer,
-            "Territoires d'engagement -<br>la cellule de conseil et d'orientation":this.ccoLayer,
+            "Territoires en commun :<br>les projets partagés":this.tecLayer,
+            "Territoires d'engagement :<br>les parcours":this.tdeLayer,
+            "Territoires d'engagement :<br>la cellule de conseil et d'orientation":this.ccoLayer,
             // "Territoires":this.markersLayer,
             "Toponymes":this.labelLayer
         },{
-            collapsed:true,
+            collapsed:false,
             position:"bottomright"
         }).addTo(this.map)
 
@@ -683,9 +680,12 @@ const MapTemplate = {
         stylishTooltip(marker) {
             return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.lib_com}</span>`
         },
-        onSearchResultReception(e) {
-            this.onClick(e);
-            this.map.flyTo([e.latitude, e.longitude], 10, {duration: 1});
+        onSearchResultReception(result) {
+            result = this.joinedData.filter(e => e.properties.codgeo == result.codgeo)[0]
+            console.log(result);
+            this.onClick(result.properties);
+
+            this.map.flyTo(result.geometry.coordinates.reverse(), 10, {duration: 1});
         },
         clearMap() {
             this.cardContent = null;
