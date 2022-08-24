@@ -185,7 +185,10 @@ const SearchBar = {
 const IntroTemplate = {
     template: `
     <div>
-        <span>introduction</span>
+        <h4>Exemple de titre</h4>
+        <p>Présentation carte</p>
+        <h4>Exemple de titre 2</h4>
+        <p>Présentation démarche</p>
     </div>`
 };
 
@@ -206,11 +209,11 @@ const CardTemplate = {
     template:`
         <div class="card">
             <div class= "card-header">
-                <span>{{ obs.lib_com }} ({{ obs.insee_dep }})</span>
+                <span>{{ obs.lib_com }} ({{ obs.codgeo }})</span>
             </div>
             <div class= "card-body">
-                <info subtitle="Nombre d'habitants en 2017" :element="obs.pop"></info>
-                <info subtitle="Département" :element="obs.lib_dep + ' (' + obs.insee_dep + ')'"></info>
+                <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
+                <info subtitle="Type de démarche engagée" :element="obs.demarche"></info>
                 <info subtitle="Région" :element="obs.lib_reg"></info>
                 <info subtitle="EPCI" :element="obs.lib_epci"></info>
             </div>
@@ -241,15 +244,14 @@ const SidebarTemplate = {
         <div class="leaflet-sidebar-content">
             <div class="leaflet-sidebar-pane" id="home">
                 <div class="leaflet-sidebar-header">
-                    <span>Accueil</span>
+                    <span>
+                        Carte interactive des territoires en commun et territoires d'engagement
+                    </span>
                     <span class="leaflet-sidebar-close">
                         <i class="las la-step-backward"></i>
                     </span>
                 </div>
                 <div v-if="!show" class="sidebar-body">
-                    <!--<h3>
-                        Carte interactive des territoires en commun et territoires d'engagement
-                    </h3>-->
                     <search-group @searchResult="getResult"></search-group><br>
                     <text-intro></text-intro>
                 </div>
@@ -338,7 +340,7 @@ const MapTemplate = {
                 @searchResult="onSearchResultReception">
             </sidebar>
             <div id="mapid"></div>
-        </div>`,
+    </div>`,
     data() {
         return {
             config:{
@@ -471,26 +473,32 @@ const MapTemplate = {
         depGeom() {
             return this.loadGeom("data/geom_dep.geojson")
         },
+        comGeom() {
+            return this.loadGeom("data/geom_com2020.geojson")
+        },
+        async rawData() {
+            return await getData(data_url)
+        }
     },
-    mounted() {
-        if(!tab) {
-            this.loadData(); // load data
-            console.info("Loading from drive");
-        } else {
-            spreadsheet_res = tab;
-            console.info("Loading from session storage");
-            setTimeout(() => {                
-                page_status = "loaded";
-            }, 300);
-        };
+    async mounted() {
+        // 1 charge les données puis ...
+        this.rawData.then(data => {
+            // ... 2 charge les géométries puis ...
+            this.comGeom.then(geom => {
+                // ... 3 joint les données aux géométries ...
+                let joinedData = this.joinGeom(data,geom)
+                // ... 4 créée la couche sur leaflet ...
+                this.createMarkers(joinedData)
+            })
+        })
 
         // fenêtre de contrôle des couches
         L.control.layers(null,{
-            "<span style='background:red'>i</span>territoires":this.labelLayer,
-            "labels":this.markersLayer
+            "Territoires":this.markersLayer,
+            "Toponymes":this.labelLayer
         },{
             collapsed:false,
-            position:"topleft"
+            position:"topright"
         }).addTo(this.map)
 
         this.createBasemap(); // load dep geojson
@@ -503,13 +511,6 @@ const MapTemplate = {
             const data = await res.json()
             return data
         },
-        loadData() {
-            Papa.parse(data_url, {
-                download: true,
-                header: true,
-                complete: (results) => this.joinDataOnGeom(results.data)
-            });
-        },
         checkPageStatus() {
             if(page_status == undefined) {
                 window.setTimeout(this.checkPageStatus,5);
@@ -518,32 +519,24 @@ const MapTemplate = {
                 this.createMarkers()
             };
         },
-        joinDataOnGeom(res) {
-            fetch("data/geom_com2020.geojson")
-            .then(res => res.json())
-            .then(com_geom => {
-                com_geom = com_geom.features;
-                // 1/ filtre
-                com_geom = com_geom.filter(e => {
-                    if(res.filter(f => f.codgeo == e.properties.insee_com).length >0) {
-                        return e
-                    }
-                });
-                // 2 jointure
-                com_geom.forEach(e => {
-                    res.forEach(d => {
-                        if(e.properties.insee_com == d.codgeo) {
-                            for (var key of Object.keys(d)) {
-                                e.properties[key] = d[key]
-                            }
-                        }
-                    })
-                });
-                // 3 tableau final
-                com_geom.forEach(e => spreadsheet_res.push(e.properties))
-                sessionStorage.setItem("session_data", JSON.stringify(spreadsheet_res))
-                page_status = "loaded";
+        joinGeom(attrData,res) {
+            // 1/ récupération des géométries dont le code geo est présent dans le csv
+            let features = res.features.filter(feature => {
+                if(attrData.filter(e => e.codgeo == feature.properties.insee_com).length >0) {
+                    return feature
+                }
             });
+            // 2 jointure
+            features.forEach(e => {
+                attrData.forEach(d => {
+                    if(e.properties.insee_com == d.codgeo) {
+                        for (var key of Object.keys(d)) {
+                            e.properties[key] = d[key]
+                        }
+                    }
+                })
+            })
+            return features
         },
         createBasemap() {
             let promises = [];
@@ -560,6 +553,7 @@ const MapTemplate = {
                 return [aa, bb, cc, dd]
             }).then(res => {
                 let map = this.map;
+                let labelLayer = this.labelLayer
                 this.geom_dep = res[0]
                 this.geom_reg = res[1]
 
@@ -584,7 +578,7 @@ const MapTemplate = {
                         className:"regLabels",
                         rendererFactory: L.canvas()
                       })
-                    labelReg.addTo(this.map);
+                    labelReg.addTo(labelLayer);
             
                     const labelDep = new L.GeoJSON(labelGeom, {
                         pointToLayer: function (feature, latlng) {
@@ -600,39 +594,45 @@ const MapTemplate = {
                         rendererFactory: L.canvas()
                       });
 
+
                       map.on('zoomend', function() {
                         let zoom = map.getZoom();
                         switch (true) {
                           case zoom < 7 :
-                            labelDep.removeFrom(map)
+                            labelDep.removeFrom(labelLayer)
                             break;
                           case zoom >= 6 :
-                            labelDep.addTo(map);
+                            labelDep.addTo(labelLayer);
                             break;
                         }
                       });
                     };
             }).catch((err) => {
                 console.log(err);
-            });;
+            });
         },
-        createMarkers() {
-            console.log(spreadsheet_res);
-            for(let i=0; i<spreadsheet_res.length; i++) {
-                let e = spreadsheet_res[i];
-                let marker = L.circleMarker([e.latitude, e.longitude],this.symbology.markers.default)
-                .bindTooltip(this.stylishTooltip(e),this.symbology.tooltip.default)
+        createMarkers(data) {
+            for(let i=0; i<data.length; i++) {
+                let e = data[i];
+                let props = e.properties
+                // let marker = L.circleMarker(e.geometry.coordinates,this.symbology.markers.default)
+                let symbologyDefault = this.symbology.markers.default
+                let marker = new L.GeoJSON(e, {
+                    pointToLayer: function (feature, latlng) {
+                        return L.circleMarker(latlng, symbologyDefault);
+                    }
+                }).bindTooltip(this.stylishTooltip(props),this.symbology.tooltip.default)
                 .on("mouseover", (e) => {
                     e.target.setStyle(this.symbology.markers.clicked)
                 }).on("mouseout",(e) => {
-                    e.target.setStyle(this.symbology.markers.default)
+                    e.target.setStyle(symbologyDefault)
                     // e.target.setStyle({fillColor:this.getColor(e.demarche)})
                 }).on("click", (e) => {
                     L.DomEvent.stopPropagation(e);
-                    this.onClick(e.sourceTarget.content)
+                    this.onClick(e.target.content)
                 });
-                marker.content = e;
-                marker.setStyle({fillColor:this.getColor(e.demarche)});
+                marker.content = props;
+                marker.setStyle({fillColor:this.getColor(props.demarche)});
                 marker.addTo(this.markersLayer);
             };
             setTimeout(() => {
