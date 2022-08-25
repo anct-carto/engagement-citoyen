@@ -85,7 +85,7 @@ const SearchBar = {
                                 @mouseover="onMouseover(i)"
                                 @mouseout="onMouseout(i)"
                                 :class="{ 'is-active': i === index }">
-                                    {{ suggestion.libgeo }} ({{ suggestion.codgeo }})
+                                    {{ suggestion.libelle }} ({{ suggestion.codgeo }})
                             </li>
                         </ul>
                     </div>
@@ -127,7 +127,7 @@ const SearchBar = {
 
             if (val != undefined && val != '') {
                 result = this.data.filter(e => {
-                    return e.libgeo.toLowerCase().includes(val.toLowerCase())
+                    return e.libelle.toLowerCase().includes(val.toLowerCase())
                 });
                 this.suggestionsList = result.slice(0,6);
             }
@@ -209,7 +209,7 @@ const CardTemplate = {
     template:`
         <div class="card">
             <div class= "card-header" :style="'color:'+obs.color">
-                <span>{{ obs.lib_com }} ({{ obs.codgeo }})</span>
+                <span>{{ obs.libgeo }} ({{ obs.codgeo }})</span>
             </div>
             <div class= "card-body">
                 <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
@@ -262,7 +262,7 @@ const SidebarTemplate = {
                 <div>
                     <card :obs="cardContent" v-if="show"></card><br>
                     <button id="back-btn" type="button" class="btn btn-primary" v-if="show" @click="onClick">
-                        <i class="las la-chevron-left"></i>
+                        <i class="la la-arrow-left"></i>
                         Retour
                     </button>
                 </div>
@@ -481,7 +481,7 @@ const MapTemplate = {
             return this.loadGeom("data/geom_dep.geojson")
         },
         comGeom() {
-            return this.loadGeom("data/geom_com2020.geojson")
+            return this.loadGeom("data/geom_ctr.geojson")
         },
         async rawData() {
             return await getData(data_url)
@@ -532,14 +532,14 @@ const MapTemplate = {
         joinGeom(attrData,res) {
             // 1/ récupération des géométries dont le code geo est présent dans le csv
             let features = res.features.filter(feature => {
-                if(attrData.filter(e => e.codgeo == feature.properties.insee_com).length >0) {
+                if(attrData.filter(e => e.codgeo == feature.properties.codgeo).length >0) {
                     return feature
                 }
             });
             // 2 jointure
             features.forEach(e => {
                 attrData.forEach(d => {
-                    if(e.properties.insee_com == d.codgeo) {
+                    if(e.properties.codgeo == d.codgeo) {
                         for (var key of Object.keys(d)) {
                             e.properties[key] = d[key]
                         }
@@ -623,11 +623,11 @@ const MapTemplate = {
         },
         createMarkers(data) {
             for(let i=0; i<data.length; i++) {
-                let e = data[i];
-                let props = e.properties
+                let territoire = data[i];
+                let props = territoire.properties
                 // let marker = L.circleMarker(e.geometry.coordinates,this.symbology.markers.default)
                 let symbologyDefault = this.symbology.markers.default
-                let marker = new L.GeoJSON(e, {
+                let marker = new L.GeoJSON(territoire, {
                     pointToLayer: function (feature, latlng) {
                         return L.circleMarker(latlng, symbologyDefault);
                     }
@@ -639,7 +639,7 @@ const MapTemplate = {
                     // e.target.setStyle({fillColor:this.getColor(e.demarche)})
                 }).on("click", (e) => {
                     L.DomEvent.stopPropagation(e);
-                    this.onClick(e.target.content)
+                    this.onClick(territoire)
                 });
                 marker.content = props;
                 marker.content.color = this.getColor(props.demarche)
@@ -651,11 +651,11 @@ const MapTemplate = {
                         marker.addTo(this.tecLayer);                        
                         break;
                     case "TDE":
-                    marker.addTo(this.tdeLayer);
-                    break;
+                        marker.addTo(this.tdeLayer);
+                        break;
                     case "CCO":
-                    marker.addTo(this.ccoLayer);                        
-                    break;
+                        marker.addTo(this.ccoLayer);                        
+                        break;
                 }
                 // marker.addTo(this.markersLayer);
             };
@@ -668,24 +668,25 @@ const MapTemplate = {
             this.pinLayer.clearLayers();
             
             // crée un marqueur au clic
-            let glow = new L.circleMarker([i.latitude, i.longitude],this.symbology.markers.clicked).addTo(this.pinLayer);
-            let circle = new L.circleMarker([i.latitude, i.longitude],this.symbology.markers.default).addTo(this.pinLayer);
-            circle.setStyle({fillColor:this.getColor(i.demarche)});
-            glow.setStyle({fillColor:this.getColor(i.demarche)});
+            let coords = i.geometry.coordinates.reverse()
+            let glow = new L.circleMarker(coords,this.symbology.markers.clicked).addTo(this.pinLayer);
+            let circle = new L.circleMarker(coords,this.symbology.markers.default).addTo(this.pinLayer);
+            circle.setStyle({fillColor:this.getColor(i.properties.demarche)});
+            glow.setStyle({fillColor:this.getColor(i.properties.demarche)});
 
             // 2 envoie valeur au composant "fiche"
-            this.cardContent = i;
+            this.cardContent = i.properties;
             this.sidebar.open("home");
         },
         stylishTooltip(marker) {
-            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.lib_com}</span>`
+            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.libgeo}</span>`
         },
         onSearchResultReception(result) {
             result = this.joinedData.filter(e => e.properties.codgeo == result.codgeo)[0]
-            console.log(result);
-            this.onClick(result.properties);
+            this.onClick(result);
 
-            this.map.flyTo(result.geometry.coordinates.reverse(), 10, {duration: 1});
+            let coords = result.geometry.coordinates;          
+            this.map.flyTo(coords, 10, {duration: 1});
         },
         clearMap() {
             this.cardContent = null;
