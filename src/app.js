@@ -1,7 +1,7 @@
 /*
     Carte interactive des territoires en commnun et territoires d'engagement
     Hassen Chougar / service cartographie - ANCT
-    dependances : Leaflet v1.0.8, vue v2.7, vue-router v4.0.5, bootstrap v4.6.0, papaparse v5.3.1
+    dependances : Leaflet 1.0.8, vue 2.7, vue-router 4.0.5, bootstrap 5.1, papaparse 5.3.1
 */
 
 // Chargement données globales ****************************************************************************
@@ -36,7 +36,6 @@ async function getData(path) {
 }
 
 
-// const data_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTOLYK3fGTi0MyoFY4iAz9zDsXFy7_t-dni9ijNBKnVZTW540K73BXDYCeUGJN80hXqCqscqX9xO19v/pub?output=csv"
 const data_url = "data/liste_tec_te.csv"
 let spreadsheet_res = [];
 let tab = JSON.parse(sessionStorage.getItem("session_data"));
@@ -670,8 +669,8 @@ const MapTemplate = {
             this.pinLayer.clearLayers();
             
             // crée un marqueur au clic
-            let coords = i.geometry.coordinates.reverse()
-            let glow = new L.circleMarker(coords,this.symbology.markers.clicked).addTo(this.pinLayer);
+            let coords = i.geometry.coordinates;
+            let glow = new L.circleMarker([coords[1],coords[0]],this.symbology.markers.clicked).addTo(this.pinLayer);
             let circle = new L.circleMarker(coords,this.symbology.markers.default).addTo(this.pinLayer);
             circle.setStyle({fillColor:this.getColor(i.properties.demarche)});
             glow.setStyle({fillColor:this.getColor(i.properties.demarche)});
@@ -687,8 +686,8 @@ const MapTemplate = {
             result = this.joinedData.filter(e => e.properties.codgeo == result.codgeo)[0]
             this.onClick(result);
 
-            let coords = result.geometry.coordinates;          
-            this.map.flyTo(coords, 10, {duration: 1});
+            // let coords = result.geometry.coordinates;
+            // this.map.flyTo([coords[1],coords[0]], 10, {duration: 1});
         },
         clearMap() {
             this.cardContent = null;
