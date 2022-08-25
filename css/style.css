@@ -290,19 +290,20 @@ li {
 
 #back-btn {
 	background-color: var(--jaune-anct);
-	color:black;
+	color:var(--bleu-anct);
+	font-family: 'Marianne-Bold';
 	border: none;
-	font-size: .9em;
+	border-radius: 0;
+	text-transform: uppercase;
+	margin: 0;
 }
 
 #back-btn:hover {
-	font-family: "Marianne-Bold";
-	opacity: .75;;
+	background-color: var(--bleu-anct);
+	color:var(--jaune-anct)
 }
 
-#back-btn i {
-	font-size: .8em;
-}
+
 
 /* -------------------------------------------------------------------------- */
 /* 								 SCROLL BAR						   	 		  */													
