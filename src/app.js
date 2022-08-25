@@ -215,6 +215,8 @@ const CardTemplate = {
                 <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
                 <info subtitle="Type de démarche engagée" :element="obs.demarche"></info>
                 <info subtitle="Période d'accompagement" :element="'A venir'"></info>
+                <info subtitle="URL" :element="'A venir'"></info>
+                <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche=='TEC'"></info>
                 <info subtitle="Actions accompagnées" :element="'A venir'"></info>
                 <info subtitle="EPCI" :element="obs.lib_epci"></info>
             </div>
