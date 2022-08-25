@@ -1,6 +1,7 @@
 pages:
   stage: deploy
   script:
+    - echo $CI_PROJECT_NAME
     - shopt -s extglob
     - mkdir public
     - mv !(public) public
