@@ -233,14 +233,14 @@ li {
 	background-color: white;
 	cursor: pointer;
 	list-style: none;
-	transition: .05s;
+	/* transition: .05s; */
 	box-shadow: 0 10px 20px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
 }
 
 .list-group-item.is-active {
-	background-color: var(--bleu-anct);
+	background-color: var(--jaune-anct);
 	font-family: 'Marianne-Bold';
-	color:white;
+	/* color:white; */
 	display: block;
 }
 

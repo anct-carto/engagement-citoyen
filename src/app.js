@@ -71,7 +71,7 @@ const SearchBar = {
                 <div class="input-group">
                     <input ref = "input" class="form-control shadow-none py-2 border-right-0 border-left-0"
                             id="search-field" type="search"
-                            placeholder="Territoire ..." 
+                            placeholder="Rechercher un territoire ..." 
                             v-model="inputAdress"
                             @keyup="onKeypress($event)" 
                             @keydown.down="onKeyDown"
