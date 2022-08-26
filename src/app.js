@@ -115,15 +115,15 @@ const SearchBar = {
         }
     },
     async mounted() {
-        this.data = await getData(dataUrl);
-
         document.addEventListener("click", this.handleClickOutside);
         document.addEventListener("keyup", (e) => {
             if(e.key === "Escape") {
                 this.isOpen = false;
                 this.index = -1;
+
             }
         });
+        this.data = await getData(dataUrl)
     },
     destroyed() {
         document.removeEventListener("click", this.handleClickOutside);
