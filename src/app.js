@@ -115,8 +115,15 @@ const SearchBar = {
         }
     },
     async mounted() {
+        this.data = await getData(dataUrl);
+
         document.addEventListener("click", this.handleClickOutside);
-        this.data = await getData(dataUrl)
+        document.addEventListener("keyup", (e) => {
+            if(e.key === "Escape") {
+                this.isOpen = false;
+                this.index = -1;
+            }
+        });
     },
     destroyed() {
         document.removeEventListener("click", this.handleClickOutside);
@@ -496,7 +503,7 @@ const MapTemplate = {
     },
     async mounted() {
         // crée le fond de carte
-        this.createBasemap(); // fond
+        await this.createBasemap(); // fond
         this.displayToponym(); // toponymes
 
         // 1. joint les données attributaires aux géométries ...
@@ -515,7 +522,7 @@ const MapTemplate = {
             position:"bottomright"
         }).addTo(this.map)
 
-        this.checkPageStatus(); // enlève le loading spinner et charge les données si tout est ok
+        // this.checkPageStatus(); // enlève le loading spinner et charge les données si tout est ok
     },
     methods: {
         async loadGeom(file) {
@@ -523,14 +530,15 @@ const MapTemplate = {
             const data = await res.json()
             return data
         },
-        checkPageStatus() {
-            if(page_status == undefined) {
-                window.setTimeout(this.checkPageStatus,5);
-            } else {
-                // ajout données
-                // this.createMarkers()
-            };
-        },
+        // checkPageStatus() {
+        //     if(page_status == undefined) {
+        //         window.setTimeout(this.checkPageStatus,5);
+        //     } else {
+        //         // ajout données
+        //         // this.createMarkers()
+        //     };
+        // },
+        // jointure entre attributs et géométries
         joinGeom(attrData,res) {
             // 1/ récupération des géométries dont le code geo est présent dans le csv
             let features = res.features.filter(feature => {
@@ -550,13 +558,24 @@ const MapTemplate = {
             })
             return features
         },
-        createBasemap() {
+        // créer le fond de carte (limite dép/reg/ ce que tu veux bref)
+        async createBasemap() {
+            const depGeom = await this.loadGeom("data/geom_dep.geojson")
+            const regGeom = await this.loadGeom("data/geom_reg.geojson")
+            const sepDromGeom = await this.loadGeom("data/cercles_drom.geojson")
+
+            new L.GeoJSON(depGeom, this.symbology.basemap.dep).addTo(this.baseMapLayer);
+            new L.GeoJSON(regGeom, this.symbology.basemap.reg).addTo(this.baseMapLayer);
+            new L.GeoJSON(sepDromGeom,this.symbology.basemap.drom).addTo(this.baseMapLayer);
+        },
+        // ancienne version de la fonction
+/*        createBasemap() {
             // fonction pour créer le fond de carte
             let promises = [];
+            
             promises.push(this.loadGeom("data/geom_dep.geojson"));
             promises.push(this.loadGeom("data/geom_reg.geojson"));
             promises.push(this.loadGeom("data/cercles_drom.geojson"));
-            promises.push(this.loadGeom("data/labels.geojson"));
 
             Promise.all(promises).then(res => {
                 let map = this.map;
@@ -569,7 +588,7 @@ const MapTemplate = {
             }).catch((err) => {
                 console.log(err);
             });
-        },
+        },*/
         displayToponym() {
             this.loadGeom("data/labels.geojson").then(labelGeom => {
                 // déclaration des objets "map" et "layer" comme constantes obligatoire sinon inconnu dans le zoomend avec "this"
