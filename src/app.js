@@ -27,11 +27,19 @@ async function getData(path) {
     } else {
         try {
             const data = await fetchCsv(path)
+            // const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records", {
+            //     method: "POST",
+            //     headers: {
+            //         "Content-Type": "application/json",
+            //         Authorization: "Bearer bd1c67305f464f797c8d09bfa76a9c6c21c2c18a",
+            //     },
+            //   })
+            // const data = await req.json()
             sessionStorage.setItem('session_data1',JSON.stringify(data));
             return data
         } catch (error) {
             console.error(error)
-        }    
+        }
     }
 }
 
@@ -126,6 +134,7 @@ const SearchBar = {
 
             if (val != undefined && val != '') {
                 result = this.data.filter(e => {
+                    console.log(e);
                     return e.libelle.toLowerCase().includes(val.toLowerCase())
                 });
                 this.suggestionsList = result.slice(0,6);
@@ -491,6 +500,7 @@ const MapTemplate = {
     async mounted() {
         // 1 charge les données puis ...
         this.rawData.then(data => {
+            console.table(data[0])
             // ... 2 charge les géométries puis ...
             this.comGeom.then(geom => {
                 // ... 3 joint les données aux géométries ...
