@@ -1,54 +1,54 @@
-"libelle","codgeo","demarche","groupe","Remarque","...6","Mettre les titres exacts pour les PP","echelon"
-"Montaud","34164","TDE",NA,NA,NA,NA,"com"
-"Comunauté de Comunes du clunisois","200040293","TDE",NA,NA,NA,NA,"epci"
-"Chambery","73065","TDE",NA,NA,NA,NA,"com"
-"Dardilly","69072","TDE",NA,NA,NA,NA,"com"
-"Flers","61169","TDE",NA,NA,NA,NA,"com"
-"Echirolles","38151","TDE",NA,"Pas dispo dans le fichier",NA,NA,"com"
-"Villeneuve d'Ascq","59009","TDE",NA,NA,NA,NA,"com"
-"Eymoutiers","87064","TDE",NA,NA,NA,NA,"com"
-"Damparis","39189","TDE",NA,NA,NA,NA,"com"
-"Saint-Denis de la Réunion","97411","TDE",NA,NA,NA,NA,"com"
-"Communauté de communes Val de Garonne","200030674","TDE",NA,NA,NA,NA,"epci"
-"Cherbourg","50129","TDE",NA,NA,NA,NA,"com"
-"Port-Brillet","53182","TDE",NA,NA,NA,NA,"com"
-"Pelussin","42168","TDE",NA,NA,NA,NA,"com"
-"Communauté de communes Marana Golo","200036499","TDE",NA,NA,NA,NA,"epci"
-"Mantes-la-Jolie","78361","TEC","Culture",NA,NA,NA,"com"
-"Guichen Pont Réan","35126","TEC","Culture",NA,NA,NA,"com"
-"Bourges","18033","TEC","Culture",NA,NA,NA,"com"
-"Niort","79191","TEC","Culture",NA,NA,NA,"com"
-"Ile-Saint-Denis","93039","TEC","Ados",NA,NA,NA,"com"
-"Paris - 20ème arrondissement","75056","TEC","Ados","Pas dispo dans le fichier",NA,NA,"com"
-"Rezé","44143","TEC","Ados",NA,NA,NA,"com"
-"Tarascon sur Ariège","09306","TEC","Ados",NA,NA,NA,"com"
-"Vaison-la-Romaine","84137","TEC","Aménagement",NA,NA,NA,"com"
-"Vandoeuvre-lès-Nancy","54547","TEC","Aménagement",NA,NA,NA,"com"
-"Communautés de communes de la vallée de Kaysersberg","246800551","TEC","Aménagement",NA,NA,NA,"epci"
-"Thiers","63430","TEC","Aménagement",NA,NA,NA,"com"
-"Ornans","25434","CCO",NA,NA,NA,NA,"com"
-"Etang de Berre","13014","CCO",NA,NA,NA,NA,"com"
-"Département de la Meuse","55","CCO",NA,NA,NA,NA,"dep"
-"Grand Périgueux","200040392","CCO",NA,NA,NA,NA,"epci"
-"Fronton","31202","CCO",NA,NA,NA,NA,"com"
-"Buis-les-Baronnies","26063","CCO",NA,NA,NA,NA,"com"
-"Pont de Beauvoisin","38315","CCO",NA,NA,NA,NA,"com"
-"Communauté de communes du sud de Mayotte","200060473","CCO",NA,"Pas dispo dans le fichier",NA,NA,"epci"
-"EPCI de Craon","200048551","CCO",NA,NA,NA,NA,"epci"
-"TCO","249740101","CCO",NA,NA,NA,NA,"epci"
-"conseil départemental Réunion","974","CCO",NA,NA,NA,NA,"dep"
-"Grand Annecy","200066793","CCO",NA,NA,NA,NA,"epci"
-"Yzeron","69269","CCO",NA,NA,NA,NA,"com"
-"Boulogne","92012","CCO",NA,NA,NA,NA,"com"
-"Ville de Rive de Gier","42186","CCO",NA,NA,NA,NA,"com"
-"Communauté de communes Terre des confluences","200066322","CCO",NA,NA,NA,NA,"epci"
-"Ville d'Annecy","74010","CCO",NA,NA,NA,NA,"com"
-"Nouvelle Calédonie","988","CCO",NA,NA,NA,NA,"dep"
-"Fresnes","94034","CCO",NA,NA,NA,NA,"com"
-"Vallées des Alpes Maritimes","06","CCO",NA,NA,NA,NA,"dep"
-"Pamiers","09225","CCO",NA,NA,NA,NA,"com"
-"Communautés de communes de Tarn-Agout","200034023","CCO",NA,NA,NA,NA,"epci"
-"Carmaux","81060","CCO",NA,NA,NA,NA,"com"
-"Communauté de communes Cœur de Chartreuse","200040111","CCO",NA,NA,NA,NA,"epci"
-"la Roche sur Foron","74224","CCO",NA,NA,NA,NA,"com"
-"Communauté de communes du Tonnerrois","200039642","CCO",NA,NA,NA,NA,"epci"
+"codgeo","libelle","echelon","demarche","groupe"
+"34164","Montaud","com","TDE",
+"200040293","Comunauté de Comunes du clunisois","epci","TDE",
+"73065","Chambery","com","TDE",
+"69072","Dardilly","com","TDE",
+"61169","Flers","com","TDE",
+"38151","Echirolles","com","TDE",
+"59009","Villeneuve d'Ascq","com","TDE",
+"87064","Eymoutiers","com","TDE",
+"39189","Damparis","com","TDE",
+"97411","Saint-Denis de la Réunion","com","TDE",
+"200030674","Communauté de communes Val de Garonne","epci","TDE",
+"50129","Cherbourg","com","TDE",
+"53182","Port-Brillet","com","TDE",
+"42168","Pelussin","com","TDE",
+"200036499","Communauté de communes Marana Golo","epci","TDE",
+"78361","Mantes-la-Jolie","com","TEC","Culture"
+"35126","Guichen Pont Réan","com","TEC","Culture"
+"18033","Bourges","com","TEC","Culture"
+"79191","Niort","com","TEC","Culture"
+"93039","Ile-Saint-Denis","com","TEC","Ados"
+"75056","Paris - 20ème arrondissement","com","TEC","Ados"
+"44143","Rezé","com","TEC","Ados"
+"09306","Tarascon sur Ariège","com","TEC","Ados"
+"84137","Vaison-la-Romaine","com","TEC","Aménagement"
+"54547","Vandoeuvre-lès-Nancy","com","TEC","Aménagement"
+"246800551","Communautés de communes de la vallée de Kaysersberg","epci","TEC","Aménagement"
+"63430","Thiers","com","TEC","Aménagement"
+"25434","Ornans","com","CCO",
+"13014","Etang de Berre","com","CCO",
+"55","Département de la Meuse","dep","CCO",
+"200040392","Grand Périgueux","epci","CCO",
+"31202","Fronton","com","CCO",
+"26063","Buis-les-Baronnies","com","CCO",
+"38315","Pont de Beauvoisin","com","CCO",
+"200060473","Communauté de communes du sud de Mayotte","epci","CCO",
+"200048551","EPCI de Craon","epci","CCO",
+"249740101","TCO","epci","CCO",
+"974","conseil départemental Réunion","dep","CCO",
+"200066793","Grand Annecy","epci","CCO",
+"69269","Yzeron","com","CCO",
+"92012","Boulogne","com","CCO",
+"42186","Ville de Rive de Gier","com","CCO",
+"200066322","Communauté de communes Terre des confluences","epci","CCO",
+"74010","Ville d'Annecy","com","CCO",
+"988","Nouvelle Calédonie","dep","CCO",
+"94034","Fresnes","com","CCO",
+"06","Vallées des Alpes Maritimes","dep","CCO",
+"09225","Pamiers","com","CCO",
+"200034023","Communautés de communes de Tarn-Agout","epci","CCO",
+"81060","Carmaux","com","CCO",
+"200040111","Communauté de communes Cœur de Chartreuse","epci","CCO",
+"74224","la Roche sur Foron","com","CCO",
+"200039642","Communauté de communes du Tonnerrois","epci","CCO",
