@@ -44,8 +44,7 @@ async function getData(path) {
 }
 
 
-const data_url = "data/liste_tec_te.csv"
-let spreadsheet_res = [];
+const dataUrl = "data/liste_tec_te.csv"
 let tab = JSON.parse(sessionStorage.getItem("session_data"));
 let page_status;
 
@@ -117,7 +116,7 @@ const SearchBar = {
     },
     async mounted() {
         document.addEventListener("click", this.handleClickOutside);
-        this.data = await getData(data_url)
+        this.data = await getData(dataUrl)
     },
     destroyed() {
         document.removeEventListener("click", this.handleClickOutside);
@@ -492,25 +491,18 @@ const MapTemplate = {
             return this.loadGeom("data/geom_ctr.geojson")
         },
         async rawData() {
-            return await getData(data_url)
-        }
+            return getData(dataUrl)
+        },
     },
     async mounted() {
         // crée le fond de carte
-        await this.createBasemap();
-        this.displayToponym()
+        this.createBasemap(); // fond
+        this.displayToponym(); // toponymes
 
-        // chargement données géométries
-        // 1 charge les données puis ...
-        await this.rawData.then(data => {
-            // ... 2 charge les géométries puis ...
-            this.comGeom.then(geom => {
-                // ... 3 joint les données aux géométries ...
-                this.joinedData = this.joinGeom(data,geom)
-                // ... 4 créée la couche sur leaflet ...
-                this.createMarkers(this.joinedData)
-            })
-        })
+        // 1. joint les données attributaires aux géométries ...
+        this.joinedData = this.joinGeom(await this.rawData, await this.comGeom)
+        // ... 2. créée la couche sur leaflet ...
+        this.createMarkers(this.joinedData)
 
         // création fenêtre de contrôle des couches
         L.control.layers(null,{
@@ -558,55 +550,6 @@ const MapTemplate = {
             })
             return features
         },
-        displayToponym() {
-            this.loadGeom("data/labels.geojson").then(labelGeom => {
-                // déclaration des objets "map" et "layer" comme constantes obligatoire sinon inconnu dans le zoomend avec "this"
-                const labelLayer = this.labelLayer;
-                const map = this.map;
-                
-                const labelReg = new L.GeoJSON(labelGeom, {
-                    pointToLayer: function (feature, latlng) {
-                        return L.marker(latlng,{
-                            icon:createLabelIcon("labelClassReg", feature.properties.libgeom),
-                            interactive: false,
-                            className:"regLabels"
-                        })
-                    },
-                    filter : function (feature, layer) {
-                        return feature.properties.STATUT == "région";
-                    },
-                    className:"regLabels",
-                    rendererFactory: L.canvas()
-                  })
-                labelReg.addTo(labelLayer);
-        
-                const labelDep = new L.GeoJSON(labelGeom, {
-                    pointToLayer: function (feature, latlng) {
-                        return L.marker(latlng,{
-                            icon:createLabelIcon("labelClassDep", feature.properties.libgeom),
-                            interactive: false
-                        })
-                    },
-                    filter : function (feature, layer) {
-                        return feature.properties.STATUT == "département";
-                    },
-                    className:"depLabels",
-                    rendererFactory: L.canvas()
-                });
-
-                map.on('zoomend', function(e) {
-                    let zoom = map.getZoom();
-                    switch (true) {
-                      case zoom < 7 :
-                        labelDep.removeFrom(labelLayer)
-                        break;
-                      case zoom >= 6 :
-                        labelDep.addTo(labelLayer);
-                        break;
-                    }
-                  });
-            })
-        },
         createBasemap() {
             // fonction pour créer le fond de carte
             let promises = [];
@@ -627,12 +570,49 @@ const MapTemplate = {
                 console.log(err);
             });
         },
+        displayToponym() {
+            this.loadGeom("data/labels.geojson").then(labelGeom => {
+                // déclaration des objets "map" et "layer" comme constantes obligatoire sinon inconnu dans le zoomend avec "this"
+                const labelLayer = this.labelLayer;
+                const map = this.map;
+                
+                const labelReg = LToponym(labelGeom,"région");
+                const labelDep = LToponym(labelGeom,"département");
+                labelReg.addTo(labelLayer);
+
+                // ajout/suppression étiquettes reg ou dep en fonction du zoom
+                map.on('zoomend', function() {
+                    let zoom = map.getZoom();
+                    switch (true) {
+                      case zoom < 7 :
+                        labelDep.removeFrom(labelLayer)
+                        break;
+                      case zoom >= 6 :
+                        labelDep.addTo(labelLayer);
+                        break;
+                    }
+                });
+
+                function LToponym(sourceData,statut) {
+                    return new L.GeoJSON(sourceData, {
+                        pointToLayer: (feature,latlng) => L.marker(latlng, {
+                            icon:createLabelIcon("labelClassReg", feature.properties.libgeom),
+                            interactive: false,
+                            className:"regLabels"
+                        }),
+                        filter:(feature, layer) => feature.properties.STATUT == statut,
+                        className:"regLabels",
+                        rendererFactory: L.canvas()
+                      })
+                }
+            })
+        },
         createMarkers(data) {
             for(let i=0; i<data.length; i++) {
                 let territoire = data[i];
-                let props = territoire.properties
-                // let marker = L.circleMarker(e.geometry.coordinates,this.symbology.markers.default)
+                let props = territoire.properties;
                 let symbologyDefault = this.symbology.markers.default
+                
                 let marker = new L.GeoJSON(territoire, {
                     pointToLayer: function (feature, latlng) {
                         return L.circleMarker(latlng, symbologyDefault);
@@ -663,11 +643,10 @@ const MapTemplate = {
                         marker.addTo(this.ccoLayer);                        
                         break;
                 }
-                // marker.addTo(this.markersLayer);
             };
             setTimeout(() => {
                 this.sidebar.open('home');
-            }, 150);
+            }, 100);
         },
         onClick(i) {
             // vide la couche si pleine
@@ -676,11 +655,13 @@ const MapTemplate = {
             // crée un marqueur au clic
             let coords = i.geometry.coordinates;
             let glow = new L.circleMarker([coords[1],coords[0]],this.symbology.markers.clicked).addTo(this.pinLayer);
-            let circle = new L.circleMarker(coords,this.symbology.markers.default).addTo(this.pinLayer);
+            let circle = new L.circleMarker([coords[1],coords[0]],this.symbology.markers.default).addTo(this.pinLayer);
+
+            // stylisation en fonction de la propriété de différenciation
             circle.setStyle({fillColor:this.getColor(i.properties.demarche)});
             glow.setStyle({fillColor:this.getColor(i.properties.demarche)});
 
-            // 2 envoie valeur au composant "fiche"
+            // envoie les infos de l'élément sélectionné au composant "fiche"
             this.cardContent = i.properties;
             this.sidebar.open("home");
         },
@@ -755,7 +736,7 @@ new Vue({
 
 // Fonctions universelles (utiles dans tous les projets)
 
-// empêcher déplacement sur la carte
+// empêcher déplacement de la carte en maintenant/glissant le pointeur de souris sur sidebar
 function preventDrag(div, map) {
     // Disable dragging when user's cursor enters the element
     div.getContainer().addEventListener('mouseover', function () {
