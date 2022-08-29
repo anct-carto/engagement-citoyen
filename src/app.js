@@ -245,6 +245,7 @@ const CardTemplate = {
 
 // ****************************************************************************
 
+
 // composant sidebar
 const SidebarTemplate = {
     template: ` 
@@ -253,10 +254,12 @@ const SidebarTemplate = {
         <div class="leaflet-sidebar-tabs">
             <!-- top aligned tabs -->
             <ul role="tablist">
-                <li><a href="#home" role="tab"><i class="las la-home"></i></a></li>
-                <li><a href="#a-propos" role="tab"><i class="las la-info-circle"></i></a></li>
+                <li @mouseover="onMouseover('Accueil')" @mouseout="showTabName=false"><a href="#home" role="tab"><i class="las la-home"></i></a></li>
+                <li @mouseover="onMouseover('À propos')" @mouseout="showTabName=false"><a href="#a-propos" role="tab"><i class="las la-info-circle"></i></a></li>
             </ul>
-            </ul>
+            <!--<div class="tab-name" v-if="showTabName">
+                <span>{{ tabName }}</span>
+            </div>-->
         </div>
         <!-- panel content -->
         <div class="leaflet-sidebar-content">
@@ -310,7 +313,9 @@ const SidebarTemplate = {
     data() {
         return {
             show:false,
-            cardContent:null
+            cardContent:null,
+            showTabName:false,
+            tabName:'',
         }
     },
     computed: {
@@ -335,7 +340,12 @@ const SidebarTemplate = {
         },
         getResult(result) {
             this.$emit('searchResult', result)
-        }
+        },
+        // affichage tooltip au survol d'un bouton de sidebar !! expérimental 
+        onMouseover(name) {
+            this.tabName = name;
+            this.showTabName = true;
+        },
     },
 };
 
