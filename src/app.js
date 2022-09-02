@@ -6,6 +6,13 @@
 
 // Chargement données globales ****************************************************************************
 
+// test fetch grist
+fetch("https://grist.incubateur.anct.gouv.fr/f9htkc9G8u4D/engagement-citoyen/", {
+    method:"GET"
+})
+.then(res => res.json())
+.then(res => console.log(res))
+
 
 // parse csv (ou tableau issu d'un tableau partagé) en json
 function fetchCsv(data_url) {
