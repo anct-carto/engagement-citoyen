@@ -10,7 +10,7 @@
 fetch("https://grist.incubateur.anct.gouv.fr/f9htkc9G8u4D/engagement-citoyen/", {
     method:"GET"
 })
-.then(res => res.json())
+// .then(res => res.json())
 .then(res => console.log(res))
 
 
