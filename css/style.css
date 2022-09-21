@@ -275,13 +275,12 @@ li {
 
 
 .card-header {
+	color:white;
 	padding-top: 10px;
 	padding-bottom: 10px;
-	background-color: white;
-	color:var(--color-programme-second);
 	font-family: 'Marianne-Bold';
 	font-size: 1.6em;
-	border-bottom: 2px solid var(--color-programme-second);
+	text-transform: uppercase;
 }
 
 .card-body ul {

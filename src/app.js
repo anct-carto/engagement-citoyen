@@ -6,25 +6,19 @@
 
 // Chargement données globales ****************************************************************************
 
+// source données
+const dataUrl = "data/liste_tec_te.csv"
+let tab = JSON.parse(sessionStorage.getItem("session_data"));
+let page_status;
+
+
 // test fetch grist
-fetch("https://grist.incubateur.anct.gouv.fr/f9htkc9G8u4D/engagement-citoyen/", {
-    method:"GET"
-})
-.then(res => res.json())
-.then(res => console.log(res))
+// fetch("https://grist.incubateur.anct.gouv.fr/f9htkc9G8u4D/engagement-citoyen/", {
+//     method:"GET"
+// })
+// .then(res => res.json())
+// .then(res => console.log(res))
 
-
-// parse csv (ou tableau issu d'un tableau partagé) en json
-function fetchCsv(data_url) {
-    return new Promise((resolve,reject) => {
-        Papa.parse(data_url, {
-            download: true,
-            header: true,
-            complete: (res) => resolve(res.data),
-            error:(err) => reject(err)
-        });
-    })
-}
 
 // charge depuis session storage ou fetch
 async function getData(path) {
@@ -50,26 +44,52 @@ async function getData(path) {
     }
 }
 
-
-const dataUrl = "data/liste_tec_te.csv"
-let tab = JSON.parse(sessionStorage.getItem("session_data"));
-let page_status;
+// parse csv (ou tableau issu d'un tableau partagé) en json
+function fetchCsv(data_url) {
+    return new Promise((resolve,reject) => {
+        Papa.parse(data_url, {
+            download: true,
+            header: true,
+            complete: (res) => resolve(res.data),
+            error:(err) => reject(err)
+        });
+    })
+}
 
 
 
 // ****************************************************************************
+
+// écran chargement 
+
+class LoadingScreen {
+    constructor() {
+        this.state = {
+            isLoading:false
+        }
+    }
+    show() {
+        this.state.isLoading = true
+    }
+    hide() {
+        this.state.isLoading = false
+    }
+}
+
+let loadingScreen = new LoadingScreen();
+
 
 // écran de chargement
 const Loading = {
     template: `
     <div id = "loading" class="w-100 h-100 d-flex flex-column justify-content-center align-items-center">
         <div class="row">
-        <div class="spinner-border" role="status">
-            <p class="sr-only">Loading...</p>
-        </div>
+            <div class="spinner-border" role="status">
+                <p class="sr-only">Loading...</p>
+            </div>
         </div>
         <div class="row">
-        <p>Chargement en cours ...</p>
+            <p>Chargement en cours ...</p>
         </div>
     </div>
     `
@@ -148,7 +168,7 @@ const SearchBar = {
 
             if (val != undefined && val != '') {
                 result = this.data.filter(e => {
-                    return e.libelle.toLowerCase().includes(val.toLowerCase())
+                    return e.libelle.toLowerCase().replace(/-/g," ").includes(val.toLowerCase())
                 });
                 this.suggestionsList = result.slice(0,6);
             }
@@ -231,8 +251,8 @@ const CardInfoTemplate = {
 const CardTemplate = {
     template:`
         <div class="card">
-            <div class= "card-header" :style="'color:'+obs.color">
-                <span>{{ obs.libgeo }} ({{ obs.codgeo }})</span>
+            <div class= "card-header" :style="'background-color:'+obs.color">
+                <span>{{ obs.libelle }} ({{ obs.codgeo }})</span>
             </div>
             <div class= "card-body">
                 <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
@@ -254,7 +274,7 @@ const CardTemplate = {
 
 
 // composant sidebar
-const SidebarTemplate = {
+const LeafletSidebar = {
     template: ` 
     <div id="sidebar" class="leaflet-sidebar collapsed">
         <!-- nav tabs -->
@@ -362,7 +382,7 @@ const SidebarTemplate = {
 
 // composant carte avec interactions associées
 
-const MapTemplate = {
+const LeafletMap = {
     template: `
         <div>
             <sidebar 
@@ -373,29 +393,35 @@ const MapTemplate = {
             </sidebar>
             <div id="mapid"></div>
     </div>`,
+    components: {
+        'sidebar':LeafletSidebar,
+    },
     data() {
         return {
             config:{
                 map:{
-                    zoom: 6,
-                    center: [46.413220, 1.219482],
-                    zoomSnap: 0.05,
-                    maxZoom:18,
-                    preferCanvas: true,
-                    zoomControl:false,
+                    container:'mapid',
+                    tileLayer:'',
+                    attribution:"<a href = 'https://cartotheque.anct.gouv.fr/' target = '_blank'>ANCT</a>",
+                    zoomPosition:'topright',
+                    scalePosition:'bottomright',
+                    initialView:{
+                        zoom: 6,
+                        center: [46.413220, 1.219482],
+                        zoomSnap: 0.05,
+                        minZoom:4.55,
+                        maxZoom:18,
+                        preferCanvas:true,
+                    }
                 },
                 sidebar:{
+                    container: "sidebar",
                     autopan: true,
                     closeButton: true,
-                    container: "sidebar",
                     position: "left",
-                }
+                },
             },
-            symbology: {
-                styles:{
-                    labels:['TDE','TEC','CCO'],
-                    colors:['#039d7b','#f69000','#293173'],
-                },    
+            styles:{
                 basemap:{
                     dep:{
                         interactive:false,
@@ -424,10 +450,16 @@ const MapTemplate = {
                         },
                     }
                 },
-                markers:{
+                categories:{
+                    colors:['#039d7b','#f69000','#293173'],
+                    values:['TDE','TEC','CCO'],
+                    labels:[],
+                },
+                features:{
                     default:{
-                        radius:6,
-                        fillOpacity:.9,
+                        radius:5,
+                        fill:true,
+                        fillOpacity:1,
                         color:"white",
                         weight:1,
                     },
@@ -445,8 +477,8 @@ const MapTemplate = {
                         sticky:true,
                         className:'leaflet-tooltip',
                         opacity:1,
-                        offset:[0,-15],
-                        // permanent:true
+                        offset:[-10,-35],
+                        permanent:false
                     },
                     clicked:{
                         direction:"top",
@@ -457,31 +489,24 @@ const MapTemplate = {
             cardContent:null,
         }
     },
-    components: {
-        'sidebar':SidebarTemplate,
-    },
     computed: {
         map() {
-            let map = L.map('mapid', this.config.map);
-            map.attributionControl.setPrefix('<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">Leaflet</a>')
-            map.attributionControl.addAttribution("<a href = 'https://cartotheque.anct.gouv.fr/' target = '_blank'>ANCT</a>");
-            
-            // zoom control, fullscreen & scale bar
-            L.control.zoom({position: 'topright'}).addTo(map);
+            const map = L.map(this.config.map.container, this.config.map.initialView);
+            map.attributionControl.addAttribution(this.config.map.attribution);            
+            // zoom control, scale bar, fullscreen 
+            L.control.zoom({position: this.config.map.zoomPosition}).addTo(map);
+            L.control.scale({ position: this.config.map.scalePosition, imperial:false }).addTo(map);
             L.control.fullscreen({
                 position:'topright',
                 forcePseudoFullScreen:true,
                 title:'Afficher la carte en plein écran'
             }).addTo(map);
-            L.control.scale({ position: 'bottomright', imperial:false }).addTo(map);
-
             // au clic, efface la recherche
             map.on("click",() => {
                 event.stopPropagation();
-                this.clearMap()
+                this.clearMap();
             })
-
-            return map;            
+            return map;
         },
         sidebar() {
             const sidebar = window.L.control.sidebar(this.config.sidebar).addTo(this.map);
@@ -496,9 +521,6 @@ const MapTemplate = {
         pinLayer() {
             return L.layerGroup({ className: 'pin-layer' }).addTo(this.map);
         },
-        // markersLayer() {
-        //     return L.layerGroup({ className: 'points'}).addTo(this.map)
-        // },
         tecLayer() {
             return L.layerGroup({ className: 'points'}).addTo(this.map)
         },
@@ -511,23 +533,26 @@ const MapTemplate = {
         labelLayer() {
             return L.layerGroup({ className: 'label-layer' }).addTo(this.map);
         },
-        comGeom() {
-            return this.loadGeom("data/geom_ctr.geojson")
-        },
         async rawData() {
             return getData(dataUrl)
         },
     },
     async mounted() {
-        // crée le fond de carte
-        await this.createBasemap(); // fond
-        this.displayToponym(); // toponymes
+        loadingScreen.show() // pendant le chargement, active le chargement d'écran
+        await this.createBasemap(); // créé les géométries d'habillage !!! ne fonctionne pas avec les tuiles vectorielles !!!!
+        this.displayToponym(); // affiche les toponymes d'habillage
+
+        // ///////////////////////////////////
 
         // 1. joint les données attributaires aux géométries ...
-        this.joinedData = this.joinGeom(await this.rawData, await this.comGeom)
+        this.data = await getData(dataUrl)
+        this.comGeom = await this.loadGeom("data/geom_ctr.geojson");
+        this.joinedData = this.joinGeom(this.data,this.comGeom)
         // ... 2. créée la couche sur leaflet ...
-        this.createMarkers(this.joinedData)
+        this.createFeatures(this.joinedData)
 
+        // ///////////////////////////////////
+        
         // création fenêtre de contrôle des couches
         L.control.layers(null,{
             "Territoires en commun :<br>les projets partagés":this.tecLayer,
@@ -537,9 +562,11 @@ const MapTemplate = {
         },{
             collapsed:false,
             position:"bottomright"
-        }).addTo(this.map)
+        }).addTo(this.map);
 
-        // this.checkPageStatus(); // enlève le loading spinner et charge les données si tout est ok
+        // ///////////////////////////////////
+
+        loadingScreen.hide() // enlève le chargement d'écran
     },
     methods: {
         async loadGeom(file) {
@@ -547,128 +574,78 @@ const MapTemplate = {
             const data = await res.json()
             return data
         },
-        // checkPageStatus() {
-        //     if(page_status == undefined) {
-        //         window.setTimeout(this.checkPageStatus,5);
-        //     } else {
-        //         // ajout données
-        //         // this.createMarkers()
-        //     };
-        // },
-        // jointure entre attributs et géométries
-        joinGeom(attrData,res) {
-            // 1/ récupération des géométries dont le code geo est présent dans le csv
-            let features = res.features.filter(feature => {
-                if(attrData.filter(e => e.codgeo == feature.properties.codgeo).length >0) {
-                    return feature
-                }
-            });
-            // 2 jointure
-            features.forEach(e => {
-                attrData.forEach(d => {
-                    if(e.properties.codgeo == d.codgeo) {
-                        for (var key of Object.keys(d)) {
-                            e.properties[key] = d[key]
-                        }
-                    }
-                })
-            })
-            return features
-        },
         // créer le fond de carte (limite dép/reg/ ce que tu veux bref)
         async createBasemap() {
             const depGeom = await this.loadGeom("data/geom_dep.geojson")
             const regGeom = await this.loadGeom("data/geom_reg.geojson")
             const sepDromGeom = await this.loadGeom("data/cercles_drom.geojson")
 
-            new L.GeoJSON(depGeom, this.symbology.basemap.dep).addTo(this.baseMapLayer);
-            new L.GeoJSON(regGeom, this.symbology.basemap.reg).addTo(this.baseMapLayer);
-            new L.GeoJSON(sepDromGeom,this.symbology.basemap.drom).addTo(this.baseMapLayer);
+            new L.GeoJSON(depGeom, this.styles.basemap.dep).addTo(this.baseMapLayer);
+            new L.GeoJSON(regGeom, this.styles.basemap.reg).addTo(this.baseMapLayer);
+            new L.GeoJSON(sepDromGeom,this.styles.basemap.drom).addTo(this.baseMapLayer);
         },
-        // ancienne version de la fonction
-/*        createBasemap() {
-            // fonction pour créer le fond de carte
-            let promises = [];
-            
-            promises.push(this.loadGeom("data/geom_dep.geojson"));
-            promises.push(this.loadGeom("data/geom_reg.geojson"));
-            promises.push(this.loadGeom("data/cercles_drom.geojson"));
-
-            Promise.all(promises).then(res => {
-                let map = this.map;
-
-                if(map) {
-                    geom_dep = new L.GeoJSON(res[0], this.symbology.basemap.dep).addTo(this.baseMapLayer);
-                    geom_reg = new L.GeoJSON(res[1], this.symbology.basemap.reg).addTo(this.baseMapLayer);
-                    cercles_drom = new L.GeoJSON(res[2],this.symbology.basemap.drom).addTo(this.baseMapLayer);
-                };
-            }).catch((err) => {
-                console.log(err);
-            });
-        },*/
         displayToponym() {
             this.loadGeom("data/labels.geojson").then(labelGeom => {
                 // déclaration des objets "map" et "layer" comme constantes obligatoire sinon inconnu dans le zoomend avec "this"
-                const labelLayer = this.labelLayer;
                 const map = this.map;
+                const labelLayer = this.labelLayer;
                 
-                const labelReg = LToponym(labelGeom,"région");
+                LToponym(labelGeom,"région").addTo(labelLayer);
                 const labelDep = LToponym(labelGeom,"département");
-                labelReg.addTo(labelLayer);
+                const labelCan = LToponym(labelGeom,"canton");
 
                 // ajout/suppression étiquettes reg ou dep en fonction du zoom
                 map.on('zoomend', function() {
                     let zoom = map.getZoom();
                     switch (true) {
-                      case zoom < 7 :
-                        labelDep.removeFrom(labelLayer)
+                      case zoom <= 6 :
+                        [labelDep,labelCan].forEach(layer => layer.removeFrom(labelLayer))
                         break;
-                      case zoom >= 6 :
+                      case zoom > 6 && zoom <=9:
                         labelDep.addTo(labelLayer);
+                        labelCan.removeFrom(labelLayer);
+                        break;
+                      case zoom > 9 :
+                        labelCan.addTo(labelLayer);
                         break;
                     }
                 });
-
-                function LToponym(sourceData,statut) {
-                    return new L.GeoJSON(sourceData, {
-                        pointToLayer: (feature,latlng) => L.marker(latlng, {
-                            icon:createLabelIcon("labelClassReg", feature.properties.libgeom),
-                            interactive: false,
-                            className:"regLabels"
-                        }),
-                        filter:(feature, layer) => feature.properties.STATUT == statut,
-                        className:"regLabels",
-                        rendererFactory: L.canvas()
-                      })
-                }
             })
         },
-        createMarkers(data) {
-            for(let i=0; i<data.length; i++) {
-                let territoire = data[i];
-                let props = territoire.properties;
-                let symbologyDefault = this.symbology.markers.default
-                
-                let marker = new L.GeoJSON(territoire, {
+        // jointure entre attributs et géométries
+        joinGeom(attributs,geometries) {
+            let arr2Map = attributs.reduce((acc, curr) => {
+                acc[curr.codgeo] = {properties:curr}
+                return acc;
+            }, {});
+            let combined = geometries.features.map(d => Object.assign(d, arr2Map[d.properties.codgeo]));
+            combined = combined.filter(e => this.data.map(e=>e.codgeo).includes(e.properties.codgeo))
+            return combined
+        },
+        createFeatures(dataGeom) {
+            combined = dataGeom;
+
+            const symbologyDefault = this.styles.features.default
+            const getColor = (e) => this.getColor(e)
+
+            for(let i=0;i<combined.length;i++) {
+                let marker = new L.GeoJSON(combined[i], {
+                    filter:(feature) => this.data.map(e=>e.codgeo).includes(feature.properties.codgeo),
                     pointToLayer: function (feature, latlng) {
-                        return L.circleMarker(latlng, symbologyDefault);
-                    }
-                }).bindTooltip(this.stylishTooltip(props),this.symbology.tooltip.default)
-                .on("mouseover", (e) => {
-                    e.target.setStyle(this.symbology.markers.clicked)
+                        let circleMarker = L.circleMarker(latlng, symbologyDefault);
+                        circleMarker.setStyle({fillColor:getColor(feature.properties.demarche)})
+                        return circleMarker
+                    },
+                }).on("mouseover", (e) => {
+                    e.target.setStyle(this.styles.features.clicked)
                 }).on("mouseout",(e) => {
                     e.target.setStyle(symbologyDefault)
-                    // e.target.setStyle({fillColor:this.getColor(e.demarche)})
                 }).on("click", (e) => {
                     L.DomEvent.stopPropagation(e);
-                    this.onClick(territoire)
+                    this.onClick(e.sourceTarget.feature.properties.codgeo)
                 });
-                marker.content = props;
-                marker.content.color = this.getColor(props.demarche)
-                marker.setStyle({fillColor:marker.content.color});
-                
                 // ajout au calque correspondant
-                switch (props.demarche) {
+                switch (combined[i].properties.demarche) {
                     case "TEC":
                         marker.addTo(this.tecLayer);                        
                         break;
@@ -679,40 +656,37 @@ const MapTemplate = {
                         marker.addTo(this.ccoLayer);                        
                         break;
                 }
-            };
-            setTimeout(() => {
-                this.sidebar.open('home');
-            }, 100);
+                setTimeout(() => {
+                    this.sidebar.open('home');
+                }, 100);
+            }
         },
-        onClick(i) {
+        onClick(code) {
             // vide la couche si pleine
             this.pinLayer.clearLayers();
             
-            // crée un marqueur au clic
-            let coords = i.geometry.coordinates;
-            let glow = new L.circleMarker([coords[1],coords[0]],this.symbology.markers.clicked).addTo(this.pinLayer);
-            let circle = new L.circleMarker([coords[1],coords[0]],this.symbology.markers.default).addTo(this.pinLayer);
+            // // envoie les infos de l'élément sélectionné au composant "fiche"
+            let content = this.data.find(e => e.codgeo == code);
+            content.color = this.getColor(content.demarche)
+            this.cardContent = content;
 
-            // stylisation en fonction de la propriété de différenciation
-            circle.setStyle({fillColor:this.getColor(i.properties.demarche)});
-            glow.setStyle({fillColor:this.getColor(i.properties.demarche)});
+            // retrouve la géométrie
+            let coordsResult = this.comGeom.features.find(e => e.properties.codgeo == code).geometry.coordinates.reverse();
 
-            // envoie les infos de l'élément sélectionné au composant "fiche"
-            this.cardContent = i.properties;
+            // style à appliquer
+            let glow = new L.circleMarker(coordsResult,this.styles.features.clicked).addTo(this.pinLayer);
+            let circle = new L.circleMarker(coordsResult,this.styles.features.default).addTo(this.pinLayer);
+            circle.setStyle({fillColor:this.getColor(content.demarche)});
+            glow.setStyle({fillColor:this.getColor(content.demarche)});
+
             this.sidebar.open("home");
         },
         stylishTooltip(marker) {
             return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.libgeo}</span>`
         },
         onSearchResultReception(result) {
-            // retrouve l'entité correspondante dans le tableau original
-            result = this.joinedData.filter(e => e.properties.codgeo == result.codgeo)[0]
-            // simule un click sur cette entité pour renvoyer la fiche correspondante
-            this.onClick(result);
-
-            // sur la carte, fait un zoom (facultatif)
-            // let coords = result.geometry.coordinates;
-            // this.map.flyTo([coords[1],coords[0]], 10, {duration: 1});
+            // simule un click sur le code de cette entité pour renvoyer la fiche correspondante
+            this.onClick(result.codgeo);
         },
         clearMap() {
             this.cardContent = null;
@@ -726,8 +700,8 @@ const MapTemplate = {
         getColor(type) {
             // cette fonction est utile pour récupérer la bonne couleur de chaque modalité préalablement déterminée
             let color;
-            this.symbology.styles.labels.forEach((label,i) => {
-                if(label === type) color = this.symbology.styles.colors[i]
+            this.styles.categories.values.forEach((v,i) => {
+                if(v === type) color = this.styles.categories.colors[i]
             })
             return color
         },
@@ -739,29 +713,29 @@ const MapTemplate = {
 // ****************************************************************************
 // ****************************************************************************
 
-const AppTemplate = {
+const App = {
     template: 
         `<div>
-            <loading v-if="loaded=='loaded'"></loading>
-            <leaflet-map ref = "map"></leaflet-map>
+            <loading id="loading" v-if="state.isLoading"></loading>
+            <leaflet-map ref="map"></leaflet-map>
         </div>
     `,
     components: {
-        'leaflet-map': MapTemplate,
+        'leaflet-map': LeafletMap,
         'loading':Loading,
     },
     data() {
         return {
-            loaded:page_status
+            state:loadingScreen.state 
         }
-    },
+    }
 }
 
 // instance vue
 new Vue({
     el: '#app',
     components: {
-        'app': AppTemplate,
+        'app': App,
     },
 });
 
@@ -786,13 +760,28 @@ function preventDrag(div, map) {
 };
 
 // création d'étiquette de repères (chef lieux par ex) 
+function LToponym(sourceData,statut) {
+    return new L.GeoJSON(sourceData, {
+        pointToLayer: (feature,latlng) => L.marker(latlng, {
+            icon:createLabelIcon("labelClass", feature.properties.libgeom),
+            interactive: false,
+            className:"regLabels"
+        }),
+        filter:(feature) => feature.properties.STATUT == statut,
+        className:"labels",
+        rendererFactory: L.canvas()
+      })
+}
+
 function createLabelIcon(labelClass,labelText) {
     return L.divIcon({
         className: svgText(labelClass),
         html: svgText(labelText)
     })
 }
+
 function svgText(txt) {
     return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><text x="0" y = "10">'
         + txt + '</text></svg>';
 }
+
