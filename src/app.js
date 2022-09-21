@@ -316,7 +316,7 @@ const LeafletSidebar = {
             </div>
             <div class="leaflet-sidebar-pane" id="a-propos">
                 <a href="https://agence-cohesion-territoires.gouv.fr/" target="_blank">
-                    <img src="img/logo_anct.png" width="100%" style = 'padding-bottom: 5%;'>
+                    <img src="img/LOGO-ANCT+Marianne.png" width="100%" style = 'padding-bottom: 5%;'>
                 </a>
                 <p>
                     <b>Source et administration des données :</b>
