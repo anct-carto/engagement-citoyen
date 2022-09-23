@@ -534,9 +534,6 @@ const LeafletMap = {
         labelLayer() {
             return L.layerGroup({ className: 'label-layer' }).addTo(this.map);
         },
-        async rawData() {
-            return getData(dataUrl)
-        },
     },
     async mounted() {
         loadingScreen.show() // pendant le chargement, active le chargement d'écran
