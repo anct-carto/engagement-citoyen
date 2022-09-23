@@ -406,6 +406,7 @@ const LeafletMap = {
                     zoomPosition:'topright',
                     scalePosition:'bottomright',
                     initialView:{
+                        zoomControl:false,
                         zoom: 6,
                         center: [46.413220, 1.219482],
                         zoomSnap: 0.05,
@@ -477,7 +478,7 @@ const LeafletMap = {
                         sticky:true,
                         className:'leaflet-tooltip',
                         opacity:1,
-                        offset:[-10,-35],
+                        offset:[0,-15],
                         permanent:false
                     },
                     clicked:{
@@ -625,25 +626,29 @@ const LeafletMap = {
         createFeatures(dataGeom) {
             combined = dataGeom;
 
-            const symbologyDefault = this.styles.features.default
-            const getColor = (e) => this.getColor(e)
+            const styleDefault = this.styles.features.default;
+            const styleTooltipDefault = this.styles.tooltip.default;
+            const getColor = (e) => this.getColor(e);
+            const stylishTooltip = (feature) => this.stylishTooltip(feature)
 
             for(let i=0;i<combined.length;i++) {
                 let marker = new L.GeoJSON(combined[i], {
                     filter:(feature) => this.data.map(e=>e.codgeo).includes(feature.properties.codgeo),
                     pointToLayer: function (feature, latlng) {
-                        let circleMarker = L.circleMarker(latlng, symbologyDefault);
-                        circleMarker.setStyle({fillColor:getColor(feature.properties.demarche)})
+                        let circleMarker = L.circleMarker(latlng, styleDefault);
+                        circleMarker.setStyle({fillColor:getColor(feature.properties.demarche)});
+                        circleMarker.bindTooltip(stylishTooltip(feature.properties),styleTooltipDefault);
                         return circleMarker
                     },
                 }).on("mouseover", (e) => {
                     e.target.setStyle(this.styles.features.clicked)
                 }).on("mouseout",(e) => {
-                    e.target.setStyle(symbologyDefault)
+                    e.target.setStyle(styleDefault)
                 }).on("click", (e) => {
                     L.DomEvent.stopPropagation(e);
                     this.onClick(e.sourceTarget.feature.properties.codgeo)
                 });
+
                 // ajout au calque correspondant
                 switch (combined[i].properties.demarche) {
                     case "TEC":
@@ -682,7 +687,7 @@ const LeafletMap = {
             this.sidebar.open("home");
         },
         stylishTooltip(marker) {
-            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.libgeo}</span>`
+            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.libelle}</span>`
         },
         onSearchResultReception(result) {
             // simule un click sur le code de cette entité pour renvoyer la fiche correspondante
