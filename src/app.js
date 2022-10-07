@@ -108,26 +108,28 @@ const SearchBar = {
     template: `
             <div id="search-bar-container">
                 <div class="input-group">
-                    <input ref = "input" class="form-control shadow-none py-2 border-right-0 border-left-0"
-                            id="search-field" type="search"
-                            placeholder="Rechercher un territoire ..." 
+                    <i class="la la-search input-icon"></i>
+                    <input ref = "input" 
+                            class="search-field form-control"
+                            type="search"
+                            placeholder="Rechercher une commune ..." 
                             v-model="inputAdress"
                             @keyup="onKeypress($event)" 
                             @keydown.down="onKeyDown"
                             @keydown.up="onKeyUp"
                             @keyup.enter="onEnter">
-                    </div>
-                    <div class="autocomplete-suggestions-conainter" v-if="isOpen">
-                        <ul class = "list-group">
-                            <li class="list-group-item" v-for="(suggestion, i) in suggestionsList"
-                                @click="onClickSuggest(suggestion)"
-                                @mouseover="onMouseover(i)"
-                                @mouseout="onMouseout(i)"
-                                :class="{ 'is-active': i === index }">
-                                    {{ suggestion.libelle }} ({{ suggestion.codgeo }})
-                            </li>
-                        </ul>
-                    </div>
+                </div>
+                <div class="autocomplete-suggestions-conainter" v-if="isOpen">
+                    <ul class = "list-group">
+                        <li class="list-group-item" v-for="(suggestion, i) in suggestionsList"
+                            @click="onClickSuggest(suggestion)"
+                            @mouseover="onMouseover(i)"
+                            @mouseout="onMouseout(i)"
+                            :class="{ 'is-active': i === index }">
+                                {{ suggestion.libelle }} ({{ suggestion.codgeo }})
+                        </li>
+                    </ul>
+                </div>
             </div>`,
     data() {
         return {
