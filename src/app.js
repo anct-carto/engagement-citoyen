@@ -6,6 +6,11 @@
 
 // Chargement données globales ****************************************************************************
 
+// window.dsfr = {
+//     verbose: true,
+//     mode: 'manual'
+//   };
+
 // source données
 const dataUrl = "data/liste_tec_te.csv"
 let tab = JSON.parse(sessionStorage.getItem("session_data"));
@@ -226,10 +231,10 @@ const SearchBar = {
 const IntroTemplate = {
     template: `
     <div>
-        <h4>Exemple de titre</h4>
-        <p>Présentation carte</p>
-        <h4>Exemple de titre 2</h4>
-        <p>Présentation démarche</p>
+        <h4 style="font-family:'Marianne-Bold'">Lorem ipsum</h4>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sed nisl in ligula porta cursus. Duis est est, dapibus eget tempor at, tincidunt a orci. Curabitur vitae odio eros. Proin vitae auctor nisi. Phasellus cursus, nunc non auctor gravida, augue lectus fringilla nulla, quis lobortis eros ex et nibh. Nullam ipsum odio, pretium at lectus non, sodales aliquet ante. In nec massa vel lacus pulvinar ullamcorper. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nunc non erat hendrerit, fermentum erat nec, laoreet dui. Nunc consequat ipsum at est condimentum laoreet. Ut ornare cursus dolor. Donec in sem bibendum, rutrum ex non, euismod nibh. </p>
+        <h4 style="font-family:'Marianne-Bold'">Lorem ipsum</h4>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sed nisl in ligula porta cursus. Duis est est, dapibus eget tempor at, tincidunt a orci. Curabitur vitae odio eros. Proin vitae auctor nisi. Phasellus cursus, nunc non auctor gravida, augue lectus fringilla nulla, quis lobortis eros ex et nibh. Nullam ipsum odio, pretium at lectus non, sodales aliquet ante. In nec massa vel lacus pulvinar ullamcorper. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nunc non erat hendrerit, fermentum erat nec, laoreet dui. Nunc consequat ipsum at est condimentum laoreet. Ut ornare cursus dolor. Donec in sem bibendum, rutrum ex non, euismod nibh. </p>
     </div>`
 };
 
