@@ -18,11 +18,16 @@ let page_status;
 
 
 // test fetch grist
-// fetch("https://grist.incubateur.anct.gouv.fr/f9htkc9G8u4D/engagement-citoyen/", {
-//     method:"GET"
-// })
-// .then(res => res.json())
-// .then(res => console.log(res))
+test()
+async function test() {
+    try {
+        const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records")
+        const res = await req.json()
+        console.log(res);
+    } catch (err) {
+        console.error(err);
+    }
+}
 
 
 // charge depuis session storage ou fetch
@@ -32,7 +37,7 @@ async function getData(path) {
         return sessionData
     } else {
         try {
-            const data = await fetchCsv(path)
+            // const data = await fetchCsv(path)
             // const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records", {
             //     method: "POST",
             //     headers: {
