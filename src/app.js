@@ -37,7 +37,7 @@ async function getData(path) {
         return sessionData
     } else {
         try {
-            // const data = await fetchCsv(path)
+            const data = await fetchCsv(path)
             // const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records", {
             //     method: "POST",
             //     headers: {
