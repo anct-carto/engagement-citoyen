@@ -18,7 +18,7 @@ let page_status;
 
 
 // test fetch grist
-test()
+// test()
 async function test() {
     try {
         const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records")
@@ -46,7 +46,8 @@ async function getData(path) {
             //     },
             //   })
             // const data = await req.json()
-            sessionStorage.setItem('session_data1',JSON.stringify(data));
+            // sessionStorage.setItem('session_data1',JSON.stringify(data));
+            console.log(data);
             return data
         } catch (error) {
             console.error(error)
@@ -60,7 +61,7 @@ function fetchCsv(data_url) {
         Papa.parse(data_url, {
             download: true,
             header: true,
-            complete: (res) => resolve(res.data),
+            complete: (res) => resolve(res.data.filter(e => e.codgeo != "")),
             error:(err) => reject(err)
         });
     })
@@ -131,7 +132,7 @@ const SearchBar = {
                             @mouseover="onMouseover(i)"
                             @mouseout="onMouseout(i)"
                             :class="{ 'is-active': i === index }">
-                                {{ suggestion.libelle }} ({{ suggestion.codgeo }})
+                                {{ suggestion.libgeo }} ({{ suggestion.codgeo }})
                         </li>
                     </ul>
                 </div>
@@ -180,7 +181,7 @@ const SearchBar = {
 
             if (val != undefined && val != '') {
                 result = this.data.filter(e => {
-                    return e.libelle.toLowerCase().replace(/-/g," ").includes(val.toLowerCase())
+                    return e.libgeo.toLowerCase().replace(/-/g," ").includes(val.toLowerCase())
                 });
                 this.suggestionsList = result.slice(0,6);
             }
@@ -264,7 +265,7 @@ const CardTemplate = {
     template:`
         <div class="card">
             <div class= "card-header" :style="'background-color:'+obs.color">
-                <span>{{ obs.libelle }} ({{ obs.codgeo }})</span>
+                <span>{{ obs.libgeo }} ({{ obs.codgeo }})</span>
             </div>
             <div class= "card-body">
                 <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
@@ -629,6 +630,7 @@ const LeafletMap = {
                 return acc;
             }, {});
             let combined = geometries.features.map(d => Object.assign(d, arr2Map[d.properties.codgeo]));
+            console.log(attributs[0]);
             combined = combined.filter(e => this.data.map(e=>e.codgeo).includes(e.properties.codgeo))
             return combined
         },
@@ -696,7 +698,7 @@ const LeafletMap = {
             this.sidebar.open("home");
         },
         stylishTooltip(marker) {
-            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.libelle}</span>`
+            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.libgeo}</span>`
         },
         onSearchResultReception(result) {
             // simule un click sur le code de cette entité pour renvoyer la fiche correspondante
