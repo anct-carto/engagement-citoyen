@@ -118,7 +118,7 @@ const SearchBar = {
                     <input ref = "input" 
                             class="search-field form-control"
                             type="search"
-                            placeholder="Rechercher une commune ..." 
+                            placeholder="Rechercher un territoire ..." 
                             v-model="inputAdress"
                             @keyup="onKeypress($event)" 
                             @keydown.down="onKeyDown"
@@ -238,12 +238,13 @@ const SearchBar = {
 // composant texte d'introduction
 const IntroTemplate = {
     template: `
-    <div>
-        <h4 style="font-family:'Marianne-Bold'">Lorem ipsum</h4>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sed nisl in ligula porta cursus. Duis est est, dapibus eget tempor at, tincidunt a orci. Curabitur vitae odio eros. Proin vitae auctor nisi. Phasellus cursus, nunc non auctor gravida, augue lectus fringilla nulla, quis lobortis eros ex et nibh. Nullam ipsum odio, pretium at lectus non, sodales aliquet ante. In nec massa vel lacus pulvinar ullamcorper. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nunc non erat hendrerit, fermentum erat nec, laoreet dui. Nunc consequat ipsum at est condimentum laoreet. Ut ornare cursus dolor. Donec in sem bibendum, rutrum ex non, euismod nibh. </p>
-        <h4 style="font-family:'Marianne-Bold'">Lorem ipsum</h4>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur sed nisl in ligula porta cursus. Duis est est, dapibus eget tempor at, tincidunt a orci. Curabitur vitae odio eros. Proin vitae auctor nisi. Phasellus cursus, nunc non auctor gravida, augue lectus fringilla nulla, quis lobortis eros ex et nibh. Nullam ipsum odio, pretium at lectus non, sodales aliquet ante. In nec massa vel lacus pulvinar ullamcorper. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nunc non erat hendrerit, fermentum erat nec, laoreet dui. Nunc consequat ipsum at est condimentum laoreet. Ut ornare cursus dolor. Donec in sem bibendum, rutrum ex non, euismod nibh. </p>
-    </div>`
+        <div>
+            <p>Cette carte interactive recense les collectivités accompagnées par l'ANCT pour construire l'action publique locale avec et par les citoyens, au travers d'une offre de services répondant à quatre besoins des collectivités : </p>
+            <p>1. Pour s’outiller et s’inspirer des démarches de coopération et de démocratie locale : nous développons la plateforme web Territoires en commun, développée avec le soutien de la Banque des Territoires et en coopération avec 3 partenaires experts de la coopération et de la démocratie locale.</p>
+            <p>2. Pour coopérer entre collectivités sur des thématiques prioritaires et concevoir des plans d’action avec les citoyens et les acteurs locaux : nous accompagnons les <span class="legend-btn-intro" style="background-color:#f69000">projets partagés Territoires en commun</span>.</p>
+            <p>3. Pour former élus et agents, pour accompagner ses équipes, pour mener des projets emblématiques et ancrer dans son territoire une culture durable de l’engagement citoyen : nous menons les <span class="legend-btn-intro" style="background-color:#00ac8c">parcours d’accompagnement Territoires d’engagement</b>.</p>
+            <p>4. Pour préciser ses besoins et construire pas à pas une stratégie de participation : nous faisons vivre la <span class="legend-btn-intro" style="background-color:#293173">cellule de conseil et d’orientation Territoires d'engagement.</span></p>
+        </div>`
 };
 
 // ****************************************************************************
@@ -304,11 +305,11 @@ const LeafletSidebar = {
         <!-- panel content -->
         <div class="leaflet-sidebar-content">
             <div class="leaflet-sidebar-header">
-                <span>
+                <span style="color:gray">
                     Carte interactive des
                 </span>
                 <h4>
-                    territoires en commun et territoires d'engagement
+                    territoires en commun et<br>territoires d'engagement
                 </h4>
                 <span class="leaflet-sidebar-close" @click="sidebar.close()">
                     <i class="la la-step-backward"></i>
@@ -316,7 +317,7 @@ const LeafletSidebar = {
             </div>
             <div class="leaflet-sidebar-pane" id="home">
                 <div v-if="!show" class="sidebar-body">
-                    <search-group @searchResult="getResult"></search-group><br>
+                    <search-group @searchResult="getResult"></search-group>
                     <text-intro></text-intro>
                 </div>
                 <div>
@@ -630,7 +631,6 @@ const LeafletMap = {
                 return acc;
             }, {});
             let combined = geometries.features.map(d => Object.assign(d, arr2Map[d.properties.codgeo]));
-            console.log(attributs[0]);
             combined = combined.filter(e => this.data.map(e=>e.codgeo).includes(e.properties.codgeo))
             return combined
         },
