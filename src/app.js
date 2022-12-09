@@ -244,6 +244,10 @@ const IntroTemplate = {
             <p>2. Pour coopérer entre collectivités sur des thématiques prioritaires et concevoir des plans d’action avec les citoyens et les acteurs locaux : nous accompagnons les <span class="legend-btn-intro" style="background-color:#f69000">projets partagés Territoires en commun</span>.</p>
             <p>3. Pour former élus et agents, pour accompagner ses équipes, pour mener des projets emblématiques et ancrer dans son territoire une culture durable de l’engagement citoyen : nous menons les <span class="legend-btn-intro" style="background-color:#00ac8c">parcours d’accompagnement Territoires d’engagement</b>.</p>
             <p>4. Pour préciser ses besoins et construire pas à pas une stratégie de participation : nous faisons vivre la <span class="legend-btn-intro" style="background-color:#293173">cellule de conseil et d’orientation Territoires d'engagement.</span></p>
+            <br><a id="back-btn" type="button" class="btn btn-primary" href="https://agence-cohesion-territoires.gouv.fr/territoires-dengagement-territoires-en-commun-528" target="_blank">
+            <i class="las la-external-link-alt"></i>
+                En savoir plus
+            </a>
         </div>`
 };
 
@@ -270,7 +274,7 @@ const CardTemplate = {
             </div>
             <div class= "card-body">
                 <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
-                <info subtitle="Type de démarche engagée" :element="obs.demarche"></info>
+                <info subtitle="Type de démarche engagée" :element="demarche"></info>
                 <info subtitle="Période d'accompagement" :element="'A venir'"></info>
                 <info subtitle="URL" :element="'A venir'"></info>
                 <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche=='TEC'"></info>
@@ -281,6 +285,23 @@ const CardTemplate = {
     props: ['obs'],
     components: {
         'info':CardInfoTemplate,
+    },
+    computed: {
+        demarche() {
+            let demarche;
+            switch (this.obs.demarche) {
+                case "TEC":
+                    demarche = "Territoires en commun : les projets partagés"
+                    break;  
+                case "TDE":
+                    demarche = "Territoires d'engagement : les parcours"
+                    break;  
+                case "CCO":
+                    demarche = "Territoires d'engagement : la cellule de conseil et d'orientation"
+                    break;  
+            };
+            return demarche
+        }
     }
 };
 
@@ -549,6 +570,11 @@ const LeafletMap = {
             return L.layerGroup({ className: 'label-layer' }).addTo(this.map);
         },
     },
+    // watch:{
+    //     enableLayer() {
+            
+    //     }
+    // },
     async mounted() {
         loadingScreen.show() // pendant le chargement, active le chargement d'écran
         await this.createBasemap(); // créé les géométries d'habillage !!! ne fonctionne pas avec les tuiles vectorielles !!!!
@@ -572,8 +598,8 @@ const LeafletMap = {
             "Territoires d'engagement :<br>la cellule de conseil et d'orientation":this.ccoLayer,
             "Toponymes":this.labelLayer
         },{
-            collapsed:false,
-            position:"bottomright"
+            collapsed:true,
+            position:"topright"
         }).addTo(this.map);
 
         // ///////////////////////////////////

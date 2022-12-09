@@ -117,8 +117,16 @@ body i {
 }
 
 .legend-btn-intro {
-	font-family: 'Marianne-Bold';
+	font-family: 'Marianne-Regular';
 	color:white;
+	padding-left: 5px;
+	padding-right: 5px;
+	padding-bottom: 2px;
+	/* cursor: pointer; */
+}
+
+.legend-btn-intro:hover {
+	/* text-decoration: underline 1px white; */
 }
 
 /* -------------------------------------------------------------------------- */
