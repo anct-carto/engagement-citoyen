@@ -116,6 +116,10 @@ body i {
 	text-align: center;
 }
 
+.legend-btn-intro {
+	font-family: 'Marianne-Bold';
+	color:white;
+}
 
 /* -------------------------------------------------------------------------- */
 /* 									LEAFLET MAP					   	 		  */													
