@@ -239,16 +239,21 @@ const SearchBar = {
 const IntroTemplate = {
     template: `
         <div>
-            <p>Cette carte interactive recense les collectivités accompagnées par l'ANCT pour construire l'action publique locale avec et par les citoyens, au travers d'une offre de services répondant à quatre besoins des collectivités : </p>
+            <p>Cette carte interactive recense les territoires accompagnés par l'ANCT pour construire l'action publique locale avec et par les citoyens, au travers d'une offre de services répondant à quatre besoins des collectivités : </p>
             <p>1. Pour s’outiller et s’inspirer des démarches de coopération et de démocratie locale : nous développons la plateforme web Territoires en commun, développée avec le soutien de la Banque des Territoires et en coopération avec 3 partenaires experts de la coopération et de la démocratie locale.</p>
-            <p>2. Pour coopérer entre collectivités sur des thématiques prioritaires et concevoir des plans d’action avec les citoyens et les acteurs locaux : nous accompagnons les <span class="legend-btn-intro" style="background-color:#f69000">projets partagés Territoires en commun</span>.</p>
-            <p>3. Pour former élus et agents, pour accompagner ses équipes, pour mener des projets emblématiques et ancrer dans son territoire une culture durable de l’engagement citoyen : nous menons les <span class="legend-btn-intro" style="background-color:#00ac8c">parcours d’accompagnement Territoires d’engagement</b>.</p>
-            <p>4. Pour préciser ses besoins et construire pas à pas une stratégie de participation : nous faisons vivre la <span class="legend-btn-intro" style="background-color:#293173">cellule de conseil et d’orientation Territoires d'engagement.</span></p>
+            <p>2. Pour coopérer entre collectivités sur des thématiques prioritaires et concevoir des plans d’action avec les citoyens et les acteurs locaux : nous accompagnons les <span class="legend-btn-intro" style="background-color:#f69000" @click="controlLayers('TEC')">projets partagés Territoires en commun</span>.</p>
+            <p>3. Pour former élus et agents, pour accompagner ses équipes, pour mener des projets emblématiques et ancrer dans son territoire une culture durable de l’engagement citoyen : nous menons les <span class="legend-btn-intro" style="background-color:#00ac8c" @click="controlLayers('TDE')">parcours d’accompagnement Territoires d’engagement</span>.</p>
+            <p>4. Pour préciser ses besoins et construire pas à pas une stratégie de participation : nous faisons vivre la <span class="legend-btn-intro" style="background-color:#293173" @click="controlLayers('CCO')">cellule de conseil et d’orientation Territoires d'engagement.</span></p>
             <br><a id="back-btn" type="button" class="btn btn-primary" href="https://agence-cohesion-territoires.gouv.fr/territoires-dengagement-territoires-en-commun-528" target="_blank">
             <i class="las la-external-link-alt"></i>
                 En savoir plus
             </a>
-        </div>`
+        </div>`,
+        methods: {
+            controlLayers(demarche) {
+                this.$emit('controlLayers',demarche)
+            }
+        },
 };
 
 // ****************************************************************************
@@ -274,7 +279,7 @@ const CardTemplate = {
             </div>
             <div class= "card-body">
                 <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
-                <info subtitle="Type de démarche engagée" :element="demarche"></info>
+                <info subtitle="Démarche engagée" :element="demarche"></info>
                 <info subtitle="Période d'accompagement" :element="'A venir'"></info>
                 <info subtitle="URL" :element="'A venir'"></info>
                 <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche=='TEC'"></info>
@@ -339,7 +344,7 @@ const LeafletSidebar = {
             <div class="leaflet-sidebar-pane" id="home">
                 <div v-if="!show" class="sidebar-body">
                     <search-group @searchResult="getResult"></search-group>
-                    <text-intro></text-intro>
+                    <text-intro @controlLayers="emitLayerId"></text-intro>
                 </div>
                 <div>
                     <card :obs="cardContent" v-if="show"></card><br>
@@ -362,7 +367,7 @@ const LeafletSidebar = {
                     ANCT, pôle Analyse & diagnostics territoriaux - <a href = 'https://cartotheque.anct.gouv.fr/cartes' target="_blank">Service cartographie</a>
                 </p>
                 <p>Technologies utilisées : Leaflet, Bootstrap, Vue.js 2.7</p>
-                <p>Le code source de cet outil est consultable sur <a href="https://www.github.com/anct-carto/pvd" target="_blank">Github</a>.</p>
+                <p>Le code source de cet outil est consultable sur <a href="https://www.github.com/anct-carto/engagement-citoyen" target="_blank">Github</a>.</p>
             </div>
         </div>
     </div>`,
@@ -408,6 +413,9 @@ const LeafletSidebar = {
             this.tabName = name;
             this.showTabName = true;
         },
+        emitLayerId(demarche) {
+            this.$emit("controlLayers",demarche)
+        }
     },
 };
 
@@ -424,6 +432,7 @@ const LeafletMap = {
                 ref="sidebar" 
                 :sourceData="cardContent" 
                 @clearMap="clearMap()" 
+                @controlLayers="controlLayers"
                 @searchResult="onSearchResultReception">
             </sidebar>
             <div id="mapid"></div>
@@ -747,6 +756,23 @@ const LeafletMap = {
             })
             return color
         },
+        controlLayers(demarche) {
+            switch (demarche) {
+                case "TEC":
+                    [this.tecLayer,this.tdeLayer,this.ccoLayer].forEach(layer => layer.removeFrom(this.map));
+                    this.tecLayer.addTo(this.map);
+                    break;
+                case "TDE":
+                    [this.tecLayer,this.tdeLayer,this.ccoLayer].forEach(layer => layer.removeFrom(this.map));
+                    this.tdeLayer.addTo(this.map);
+                    break;
+                case "CCO":
+                    [this.tecLayer,this.tdeLayer,this.ccoLayer].forEach(layer => layer.removeFrom(this.map));
+                    this.ccoLayer.addTo(this.map);                    
+                    break;
+            }
+            console.log(demarche);
+        }
     },
 }
 
