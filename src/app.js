@@ -23,7 +23,6 @@ async function test() {
     try {
         const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records")
         const res = await req.json()
-        console.log(res);
     } catch (err) {
         console.error(err);
     }
@@ -47,7 +46,6 @@ async function getData(path) {
             //   })
             // const data = await req.json()
             // sessionStorage.setItem('session_data1',JSON.stringify(data));
-            console.log(data);
             return data
         } catch (error) {
             console.error(error)
@@ -280,8 +278,8 @@ const CardTemplate = {
             <div class= "card-body">
                 <info subtitle="Démarche engagée" :element="demarche"></info>
                 <info subtitle="Période d'accompagement" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
-                <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche == 'TEC'"></info>
-                <info subtitle="Actions accompagnées" :element="'obs.actions'" v-if="obs.demarche == 'TDE'"></info>
+                <info subtitle="Projets partagés" :element="obs.projet_partage" v-if="obs.demarche == 'TEC'"></info>
+                <info subtitle="Actions accompagnées" :element="obs.actions" v-if="obs.demarche == 'TDE'"></info>
                 <info subtitle="URL" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
             </div>
         </div>`,
@@ -769,7 +767,6 @@ const LeafletMap = {
                     this.ccoLayer.addTo(this.map);                    
                     break;
             }
-            console.log(demarche);
         }
     },
 }
