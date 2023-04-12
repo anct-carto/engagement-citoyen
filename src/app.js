@@ -281,7 +281,7 @@ const CardTemplate = {
                 <info subtitle="Démarche engagée" :element="demarche"></info>
                 <info subtitle="Période d'accompagement" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
                 <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche == 'TEC'"></info>
-                <info subtitle="Actions accompagnées" :element="'A venir'" v-if="obs.demarche == 'TDE'"></info>
+                <info subtitle="Actions accompagnées" :element="'obs.actions'" v-if="obs.demarche == 'TDE'"></info>
                 <info subtitle="URL" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
             </div>
         </div>`,
