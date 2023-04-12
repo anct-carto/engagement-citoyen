@@ -278,13 +278,11 @@ const CardTemplate = {
                 <span>{{ obs.libgeo }} ({{ obs.codgeo }})</span>
             </div>
             <div class= "card-body">
-                <info subtitle="Nombre d'habitants en 2019" :element="obs.pop"></info>
                 <info subtitle="Démarche engagée" :element="demarche"></info>
-                <info subtitle="Période d'accompagement" :element="'A venir'"></info>
-                <info subtitle="URL" :element="'A venir'"></info>
-                <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche=='TEC'"></info>
-                <info subtitle="Actions accompagnées" :element="'A venir'"></info>
-                <info subtitle="EPCI" :element="obs.lib_epci"></info>
+                <info subtitle="Période d'accompagement" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
+                <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche == 'TEC'"></info>
+                <info subtitle="Actions accompagnées" :element="'A venir'" v-if="obs.demarche == 'TDE'"></info>
+                <info subtitle="URL" :element="'A venir'" v-if="obs.demarche != 'TEC'"></info>
             </div>
         </div>`,
     props: ['obs'],
