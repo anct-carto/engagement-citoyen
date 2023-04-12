@@ -282,7 +282,7 @@ const CardTemplate = {
                 <info subtitle="Période d'accompagement" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
                 <info subtitle="Projets partagés" :element="'A venir'" v-if="obs.demarche == 'TEC'"></info>
                 <info subtitle="Actions accompagnées" :element="'A venir'" v-if="obs.demarche == 'TDE'"></info>
-                <info subtitle="URL" :element="'A venir'" v-if="obs.demarche != 'TEC'"></info>
+                <info subtitle="URL" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
             </div>
         </div>`,
     props: ['obs'],
@@ -362,7 +362,7 @@ const LeafletSidebar = {
                 </p>
                 <p>
                     <b>Réalisation  et maintenance de l'outil :</b>
-                    ANCT, pôle Analyse & diagnostics territoriaux - <a href = 'https://cartotheque.anct.gouv.fr/cartes' target="_blank">Service cartographie</a>
+                    ANCT - <a href = 'https://cartotheque.anct.gouv.fr/cartes' target="_blank">Service cartographie</a>
                 </p>
                 <p>Technologies utilisées : Leaflet, Bootstrap, Vue.js 2.7</p>
                 <p>Le code source de cet outil est consultable sur <a href="https://www.github.com/anct-carto/engagement-citoyen" target="_blank">Github</a>.</p>
