@@ -3,8 +3,7 @@
 	--bleu-second:#5770be;
 	--vert-anct:#00ac8c;
 	--jaune-anct:#ffe800;
-	--color-programme:rgb(156,185,77);
-	--color-programme-second:rgb(229,125,84);
+	--text-color:#3a3a3a;
 }
 
 
@@ -328,6 +327,20 @@ li {
 	color:var(--jaune-anct)
 }
 
+/* -------------------------------------------------------------------------- */
+/* 								 URL LIENS						   	 		  */													
+/* -------------------------------------------------------------------------- */
+
+.link {
+	font-size: 1.1em;
+	color:var(--text-color) !important;
+	text-decoration: none;
+	border-bottom: solid 1px var(--text-color);
+}
+
+.link:hover {
+	border-bottom: solid 2px var(--text-color) !important;
+}
 
 
 /* -------------------------------------------------------------------------- */

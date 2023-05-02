@@ -277,10 +277,13 @@ const CardTemplate = {
             </div>
             <div class= "card-body">
                 <info subtitle="Démarche engagée" :element="demarche"></info>
-                <info subtitle="Période d'accompagement" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
+                <info subtitle="Période d'accompagement" :element="obs.periode" v-if="obs.demarche != 'CCO'"></info>
                 <info subtitle="Projets partagés" :element="obs.projet_partage" v-if="obs.demarche == 'TEC'"></info>
-                <info subtitle="Actions accompagnées" :element="obs.actions" v-if="obs.demarche == 'TDE'"></info>
-                <info subtitle="URL" :element="'A venir'" v-if="obs.demarche != 'CCO'"></info>
+                <info subtitle="Ingrédients" :element="obs.ingredients" v-if="obs.demarche == 'TDE'"></info>
+                <a class="link" :href="obs.url" target="_blank" v-if="obs.demarche != 'CCO'">
+                    <i class="las la-external-link-alt"></i>
+                    Voir la fiche projet
+                </a>
             </div>
         </div>`,
     props: ['obs'],
@@ -588,7 +591,7 @@ const LeafletMap = {
         // ///////////////////////////////////
 
         // 1. joint les données attributaires aux géométries ...
-        this.data = await getData(dataUrl)
+        this.data = await getData(dataUrl);
         this.comGeom = await this.loadGeom("data/geom_ctr.geojson");
         this.joinedData = this.joinGeom(this.data,this.comGeom)
         // ... 2. créée la couche sur leaflet ...
