@@ -24,13 +24,15 @@ async function test() {
         const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records");
         const res = await req.json();
         let data = [];
-        res.records.forEach(e => data.push(e.fields));
-        console.log(data);
+        res.records.forEach(e => {
+            e.fields.ingredients = e.fields.ingredients.split(";\n")
+            data.push(e.fields);
+        });
+        return data;
     } catch (err) {
         console.error(err);
     }
 }
-test()
 
 // charge depuis session storage ou fetch
 async function getData(path) {
@@ -291,7 +293,7 @@ const CardTemplate = {
                     <span class="subtitle">Ingrédients</span><br>
                     <ul>
                         <li v-for="ingredient in obs.ingredients" class="element">
-                            <i class="las la-arrow-right"></i>{{ ingredient }}
+                            <i class="las la-arrow-right"></i> {{ ingredient }}
                         </li>
                     </ul><br>
                 </div>
