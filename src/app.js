@@ -337,8 +337,18 @@ const LeafletSidebar = {
         <div class="leaflet-sidebar-tabs">
             <!-- top aligned tabs -->
             <ul role="tablist">
-                <li @mouseover="onMouseover('Accueil')" @mouseout="showTabName=false"><a href="#home" role="tab"><i class="las la-home"></i></a></li>
-                <li @mouseover="onMouseover('À propos')" @mouseout="showTabName=false"><a href="#a-propos" role="tab"><i class="las la-info-circle"></i></a></li>
+                <li>
+                    <a href="#home" role="tab" title="Accueil">
+                        <i class="las la-home"></i>
+                        <span class="tab-name">Accueil</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#a-propos" role="tab" title="À propos">
+                        <i class="las la-info-circle"></i>
+                        <span class="tab-name">À propos</span>
+                    </a>
+                </li>
             </ul>
             <!--<div class="tab-name" v-if="showTabName">
                 <span>{{ tabName }}</span>
@@ -423,11 +433,6 @@ const LeafletSidebar = {
         },
         getResult(result) {
             this.$emit('searchResult', result)
-        },
-        // affichage tooltip au survol d'un bouton de sidebar !! expérimental 
-        onMouseover(name) {
-            this.tabName = name;
-            this.showTabName = true;
         },
         emitLayerId(demarche) {
             this.$emit("controlLayers",demarche)
