@@ -69,7 +69,7 @@ function fetchCsv(data_url) {
         Papa.parse(data_url, {
             download: true,
             header: true,
-            complete: (res) => resolve(res.data.filter(e => e.codgeo != "")),
+            complete: (res) => resolve(res.data.filter(e => e.id_engcit != "")),
             error:(err) => reject(err)
         });
     })
