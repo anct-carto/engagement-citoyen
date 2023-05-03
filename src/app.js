@@ -21,13 +21,16 @@ let page_status;
 // test()
 async function test() {
     try {
-        const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records")
-        const res = await req.json()
+        const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records");
+        const res = await req.json();
+        let data = [];
+        res.records.forEach(e => data.push(e.fields));
+        console.log(data);
     } catch (err) {
         console.error(err);
     }
 }
-
+test()
 
 // charge depuis session storage ou fetch
 async function getData(path) {
@@ -36,7 +39,12 @@ async function getData(path) {
         return sessionData
     } else {
         try {
-            const data = await fetchCsv(path)
+            let data = await fetchCsv(path)
+            data.forEach(e => {
+                if(e.ingredients) {
+                    e.ingredients = e.ingredients.split(";\n")
+                }
+            });
             // const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records", {
             //     method: "POST",
             //     headers: {
@@ -261,7 +269,7 @@ const CardInfoTemplate = {
     template:`
         <p v-if="element">
             <span class="subtitle">{{ subtitle }}</span><br>
-            <span class="element">{{ element }}</span><br>
+            <span class="element">{{ element }}</span>
         </p>
     `,
     props: ['subtitle', 'element'],
@@ -279,7 +287,14 @@ const CardTemplate = {
                 <info subtitle="Démarche engagée" :element="demarche"></info>
                 <info subtitle="Période d'accompagement" :element="obs.periode" v-if="obs.demarche != 'CCO'"></info>
                 <info subtitle="Projets partagés" :element="obs.projet_partage" v-if="obs.demarche == 'TEC'"></info>
-                <info subtitle="Ingrédients" :element="obs.ingredients" v-if="obs.demarche == 'TDE'"></info>
+                <div v-if="obs.demarche == 'TDE' & obs.ingredients.length>0">
+                    <span class="subtitle">Ingrédients</span><br>
+                    <ul>
+                        <li v-for="ingredient in obs.ingredients" class="element">
+                            <i class="las la-arrow-right"></i>{{ ingredient }}
+                        </li>
+                    </ul><br>
+                </div>
                 <a class="link" :href="obs.url" target="_blank" v-if="obs.demarche != 'CCO'">
                     <i class="las la-external-link-alt"></i>
                     Voir la fiche projet
