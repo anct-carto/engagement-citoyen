@@ -1,4 +1,4 @@
-id_engcit,codgeo,libgeo,Echelon,demarche,periode,projet_partage,ingredients,url
+id_engcit,codgeo,libgeo,echelon,demarche,periode,projet_partage,ingredients,url
 tde-1,34164,Montaud,commune,TDE,2021-2025,,"Jour de la Nuit (Balade nocturne);
 ""Mobiliser l'intelligence d'un territoire"";
 Concevoir et animer des dispositifs participatifs",https://agence-cohesion-territoires.gouv.fr/les-parcours-daccompagnement-territoires-dengagement-493
@@ -29,18 +29,18 @@ tde-12,50129,Cherbourg-en-Cotentin,commune,TDE,2021-2025,,,https://agence-cohesi
 tde-13,53182,Port-Brillet,commune,TDE,2021-2025,,,https://agence-cohesion-territoires.gouv.fr/les-parcours-daccompagnement-territoires-dengagement-493
 tde-14,42168,Pélussin,commune,TDE,2021-2025,,,https://agence-cohesion-territoires.gouv.fr/les-parcours-daccompagnement-territoires-dengagement-493
 tde-15,200036499,CC de Marana-Golo,epci,TDE,2021-2025,,,https://agence-cohesion-territoires.gouv.fr/les-parcours-daccompagnement-territoires-dengagement-493
-tec-16,78361,Mantes-la-Jolie,commune,TEC,Sep. 2021-Dec.2022,Culture,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
-tec-17,35126,Guichen,commune,TEC,Sep. 2021-Dec.2022,Culture,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
-tec-18,18033,Bourges,commune,TEC,Sep. 2021-Dec.2022,Culture,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
-tec-19,79191,Niort,commune,TEC,Sep. 2021-Dec.2022,Culture,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
-tec-20,93039,L'Île-Saint-Denis,commune,TEC,Sep. 2021-Dec.2022,Ados,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
-tec-21,75056,Paris,commune,TEC,Sep. 2021-Dec.2022,Ados,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
-tec-22,44143,Rezé,commune,TEC,Sep. 2021-Dec.2022,Ados,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
-tec-23,09306,Tarascon-sur-Ariège,commune,TEC,Sep. 2021-Dec.2022,Ados,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
-tec-24,84137,Vaison-la-Romaine,commune,TEC,Sep. 2022- Dec.2023,Aménagement,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
-tec-25,54547,Vandœuvre-lès-Nancy,commune,TEC,Sep. 2022- Dec.2023,Aménagement,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
-tec-26,246800551,CC de la Vallée de Kaysersberg,epci,TEC,Sep. 2022- Dec.2023,Aménagement,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
-tec-27,63430,Thiers,commune,TEC,Sep. 2022- Dec.2023,Aménagement,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
+tec-16,78361,Mantes-la-Jolie,commune,TEC,Sep. 2021-Dec.2022,Démocratie culturelle,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
+tec-17,35126,Guichen,commune,TEC,Sep. 2021-Dec.2022,Démocratie culturelle,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
+tec-18,18033,Bourges,commune,TEC,Sep. 2021-Dec.2022,Démocratie culturelle,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
+tec-19,79191,Niort,commune,TEC,Sep. 2021-Dec.2022,Démocratie culturelle,,https://www.territoires-en-commun.fr/home/projets-partages/laction-culturelle-locale-avec-mantes-la-jolie-niort-guichen-et-bourges
+tec-20,93039,L'Île-Saint-Denis,commune,TEC,Sep. 2021-Dec.2022,Le droit des adolescents et des jeunes à une vie épanouie,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
+tec-21,75056,Paris,commune,TEC,Sep. 2021-Dec.2022,Le droit des adolescents et des jeunes à une vie épanouie,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
+tec-22,44143,Rezé,commune,TEC,Sep. 2021-Dec.2022,Le droit des adolescents et des jeunes à une vie épanouie,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
+tec-23,09306,Tarascon-sur-Ariège,commune,TEC,Sep. 2021-Dec.2022,Le droit des adolescents et des jeunes à une vie épanouie,,https://www.territoires-en-commun.fr/home/projets-partages/le-droit-des-adolescents-et-des-jeunes-une-vie-epanouie-avec-tarascon-sur
+tec-24,84137,Vaison-la-Romaine,commune,TEC,Sep. 2022- Dec.2023,L'aménagement territorial participatif,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
+tec-25,54547,Vandœuvre-lès-Nancy,commune,TEC,Sep. 2022- Dec.2023,L'aménagement territorial participatif,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
+tec-26,246800551,CC de la Vallée de Kaysersberg,epci,TEC,Sep. 2022- Dec.2023,L'aménagement territorial participatif,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
+tec-27,63430,Thiers,commune,TEC,Sep. 2022- Dec.2023,L'aménagement territorial participatif,,https://www.territoires-en-commun.fr/home/projets-partages/lamenagement-participatif-avec-la-communaute-de-communes-de-la-vallee
 cco-30,55,Meuse,departement,CCO,,,,
 cco-32,31202,Fronton,commune,CCO,,,,
 cco-33,26063,Buis-les-Baronnies,commune,CCO,,,,
