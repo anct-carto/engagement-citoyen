@@ -363,7 +363,7 @@ const LeafletSidebar = {
                 <h4>
                     territoires en commun et<br>territoires d'engagement
                 </h4>
-                <span class="leaflet-sidebar-close" @click="sidebar.close()">
+                <span class="leaflet-sidebar-close" @click="$emit('closeSidebar')">
                     <i class="la la-step-backward"></i>
                 </span>
             </div>
@@ -454,7 +454,8 @@ const LeafletMap = {
                 :sourceData="cardContent" 
                 @clearMap="clearMap()" 
                 @controlLayers="controlLayers"
-                @searchResult="onSearchResultReception">
+                @searchResult="onSearchResultReception"
+                @closeSidebar="sidebar.close()">
             </sidebar>
             <div id="mapid"></div>
     </div>`,
@@ -754,7 +755,8 @@ const LeafletMap = {
                         break;
                 }
                 setTimeout(() => {
-                    this.sidebar.open('home');
+                    // this.sidebar.open('home');
+                    this.sidebar.close();
                 }, 100);
             }
         },
