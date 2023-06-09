@@ -523,7 +523,7 @@ const LeafletMap = {
                 },
                 features:{
                     default:{
-                        radius:5,
+                        radius:6,
                         fill:true,
                         fillOpacity:1,
                         color:"white",
@@ -704,28 +704,53 @@ const LeafletMap = {
                     pointToLayer: function (feature, latlng) {
                         let circleMarker = L.circleMarker(latlng, styleDefault);
                         circleMarker.setStyle({fillColor:getColor(feature.properties.demarche)});
-                        circleMarker.bindTooltip(stylishTooltip(feature.properties),styleTooltipDefault);
+                        // circleMarker.bindTooltip(stylishTooltip(feature.properties),styleTooltipDefault);
                         return circleMarker
                     },
                 }).on("mouseover", (e) => {
                     e.target.setStyle(this.styles.features.clicked)
                 }).on("mouseout",(e) => {
                     e.target.setStyle(styleDefault)
+                })
+                // zone tampon invisible autour du marqueur pour le sélectionner facilement
+                let circleAnchor = new L.GeoJSON(combined[i], {
+                    filter:(feature) => this.data.map(e=>e.codgeo).includes(feature.properties.codgeo),
+                    pointToLayer: function (feature, latlng) {
+                        let circleMarker = L.circleMarker(latlng, {
+                            radius:20,
+                            fillOpacity:0,
+                            opacity:0,
+                        });
+                        circleMarker.bindTooltip(stylishTooltip(feature.properties),styleTooltipDefault);
+                        return circleMarker
+                    }
                 }).on("click", (e) => {
                     L.DomEvent.stopPropagation(e);
                     this.onClick(e.sourceTarget.feature.properties.codgeo)
+                }).on("mouseover", (e) => {
+                    e.target.setStyle(this.styles.features.clicked)
+                    e.target.setStyle({fillColor:getColor(e.sourceTarget.feature.properties.demarche)})
+                }).on("mouseout",(e) => {
+                    e.target.setStyle({
+                            radius:20,
+                            fillOpacity:0,
+                            opacity:0,
+                        })
                 });
 
                 // ajout au calque correspondant
                 switch (combined[i].properties.demarche) {
                     case "TEC":
                         marker.addTo(this.tecLayer);                        
+                        circleAnchor.addTo(this.tecLayer);                        
                         break;
                     case "TDE":
                         marker.addTo(this.tdeLayer);
+                        circleAnchor.addTo(this.tdeLayer);
                         break;
                     case "CCO":
                         marker.addTo(this.ccoLayer);                        
+                        circleAnchor.addTo(this.ccoLayer);                        
                         break;
                 }
                 setTimeout(() => {
