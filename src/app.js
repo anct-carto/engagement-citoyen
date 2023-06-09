@@ -652,6 +652,8 @@ const LeafletMap = {
             new L.GeoJSON(depGeom, this.styles.basemap.dep).addTo(this.baseMapLayer);
             new L.GeoJSON(regGeom, this.styles.basemap.reg).addTo(this.baseMapLayer);
             new L.GeoJSON(sepDromGeom,this.styles.basemap.drom).addTo(this.baseMapLayer);
+
+            this.map.fitBounds(new L.GeoJSON(regGeom).getBounds())
         },
         displayToponym() {
             this.loadGeom("data/labels.geojson").then(labelGeom => {
@@ -667,10 +669,10 @@ const LeafletMap = {
                 map.on('zoomend', function() {
                     let zoom = map.getZoom();
                     switch (true) {
-                      case zoom <= 6 :
+                      case zoom <= 7 :
                         [labelDep,labelCan].forEach(layer => layer.removeFrom(labelLayer))
                         break;
-                      case zoom > 6 && zoom <=9:
+                      case zoom > 7 && zoom <=9:
                         labelDep.addTo(labelLayer);
                         labelCan.removeFrom(labelLayer);
                         break;
