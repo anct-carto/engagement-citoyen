@@ -17,22 +17,7 @@ let tab = JSON.parse(sessionStorage.getItem("session_data"));
 let page_status;
 
 
-// test fetch grist
-// test()
-async function test() {
-    try {
-        const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records");
-        const res = await req.json();
-        let data = [];
-        res.records.forEach(e => {
-            e.fields.ingredients = e.fields.ingredients.split(";\n")
-            data.push(e.fields);
-        });
-        return data;
-    } catch (err) {
-        console.error(err);
-    }
-}
+
 
 // charge depuis session storage ou fetch
 async function getData(path) {
@@ -47,15 +32,6 @@ async function getData(path) {
                     e.ingredients = e.ingredients.split(";\n")
                 }
             });
-            // const req = await fetch("https://grist.incubateur.anct.gouv.fr/api/docs/f9htkc9G8u4D/tables/Engagement_citoyen/records", {
-            //     method: "POST",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //         Authorization: "Bearer bd1c67305f464f797c8d09bfa76a9c6c21c2c18a",
-            //     },
-            //   })
-            // const data = await req.json()
-            // sessionStorage.setItem('session_data1',JSON.stringify(data));
             return data
         } catch (error) {
             console.error(error)
@@ -247,19 +223,21 @@ const SearchBar = {
 const IntroTemplate = {
     template: `
         <div>
-            <p>Cette carte interactive recense les territoires accompagnés par l'ANCT pour construire l'action publique locale avec et par les citoyens, au travers d'une offre de services répondant à quatre besoins des collectivités : </p>
-            <p>1. Pour s’outiller et s’inspirer des démarches de coopération et de démocratie locale : nous développons la plateforme web Territoires en commun, développée avec le soutien de la Banque des Territoires et en coopération avec 3 partenaires experts de la coopération et de la démocratie locale.</p>
-            <p>2. Pour coopérer entre collectivités sur des thématiques prioritaires et concevoir des plans d’action avec les citoyens et les acteurs locaux : nous accompagnons les <span class="legend-btn-intro" style="background-color:#f69000" @click="controlLayers('TEC')">projets partagés Territoires en commun</span>.</p>
-            <p>3. Pour former élus et agents, pour accompagner ses équipes, pour mener des projets emblématiques et ancrer dans son territoire une culture durable de l’engagement citoyen : nous menons les <span class="legend-btn-intro" style="background-color:#00ac8c" @click="controlLayers('TDE')">parcours d’accompagnement Territoires d’engagement</span>.</p>
-            <p>4. Pour préciser ses besoins et construire pas à pas une stratégie de participation : nous faisons vivre la <span class="legend-btn-intro" style="background-color:#293173" @click="controlLayers('CCO')">cellule de conseil et d’orientation Territoires d'engagement.</span></p>
-            <br><a id="back-btn" type="button" class="btn btn-primary" href="https://agence-cohesion-territoires.gouv.fr/territoires-dengagement-territoires-en-commun-528" target="_blank">
-            <i class="las la-external-link-alt"></i>
+            <p>Cette carte interactive recense les territoires accompagnés par l'ANCT depuis 2021, pour construire l'action publique locale en coopération avec les citoyens et les acteurs du territoire. <br> 
+            L’offre de services Territoires d’engagement se décline dans 4 modalités :</p>
+            <p>1. la <span class="legend-btn-intro" style="background-color:#293173" @click="controlLayers('CCO')">cellule de conseil et d'orientation Territoires d'engagement </span> : une plateforme d’accompagnement à distance  accessible à tous les élus et les agents des collectivités, pour échanger sur les enjeux stratégies et les questions opérationnelles en matière de  participation citoyenne et de coopérations territoriales.</p>
+            <p>2. les <span class="legend-btn-intro" style="background-color:#00ac8c" @click="controlLayers('PATDE')">les parcours d'accompagnement Territoires d'engagement </span> : des parcours de 12 à 15 mois, adaptés à chaque territoire, pour expérimenter des démarches participatives, former les élus, accompagner les services et faire émerger dans le territoire  territoire une culture durable de l’engagement citoyen.</p>           
+            <p>3. les <span class="legend-btn-intro" style="background-color:#f69000" @click="controlLayers('PPTDE')">les projets partagés Territoires d'engagement </span> : une démarche d’ingénierie collective pour concevoir un projet de politique publique, en lien avec d’autres collectivités, en misant sur la coopération et l’engagement citoyen.  </p>
+            <p>4.les <span class="legend-btn-intro" style="background-color:#ec6555" @click="controlLayers('AI')">ateliers interactifs de l’ANCT</span> : des cycles d’ateliers d’intelligence collective à distance, animés par des experts de la coopération territoriale, pour croiser les regards et les expériences autour des grands défis qui font l’actualité des collectivités.</p>
+  
+            <br><a id="back-btn" type="button" class="btn btn-primary" href="https://anct.gouv.fr/programmes-dispositifs/territoires-d-engagement" target="_blank">
+                <i class="las la-external-link-alt"></i>
                 En savoir plus
             </a>
         </div>`,
         methods: {
-            controlLayers(demarche) {
-                this.$emit('controlLayers',demarche)
+            controlLayers(dispositif) {
+                this.$emit('controlLayers',dispositif)
             }
         },
 };
@@ -286,10 +264,10 @@ const CardTemplate = {
                 <span>{{ obs.libgeo }} ({{ obs.codgeo }})</span>
             </div>
             <div class= "card-body">
-                <info subtitle="Démarche engagée" :element="demarche"></info>
-                <info subtitle="Période d'accompagement" :element="obs.periode" v-if="obs.demarche != 'CCO'"></info>
-                <info subtitle="Projets partagés" :element="obs.projet_partage" v-if="obs.demarche == 'TEC'"></info>
-                <div v-if="obs.demarche == 'TDE' & obs.ingredients.length>0">
+                <info subtitle="Démarche engagée" :element="dispositif"></info>
+                <info subtitle="Période d'accompagement" :element="obs.periode" v-if="obs.dispositif != 'CCO'"></info>
+                <info subtitle="Projets partagés" :element="obs.projet_partage" v-if="obs.dispositif == 'PPTDE'"></info>
+                <div v-if="obs.dispositif == 'PATDE' & obs.ingredients.length>0">
                     <span class="subtitle">Ingrédients</span><br>
                     <ul>
                         <li v-for="ingredient in obs.ingredients" class="element">
@@ -297,7 +275,7 @@ const CardTemplate = {
                         </li>
                     </ul><br>
                 </div>
-                <a class="link" :href="obs.url" target="_blank" v-if="obs.demarche != 'CCO'">
+                <a class="link" :href="obs.url" target="_blank" v-if="obs.dispositif != 'CCO'">
                     <i class="las la-external-link-alt"></i>
                     Voir la fiche projet
                 </a>
@@ -308,20 +286,23 @@ const CardTemplate = {
         'info':CardInfoTemplate,
     },
     computed: {
-        demarche() {
-            let demarche;
-            switch (this.obs.demarche) {
-                case "TEC":
-                    demarche = "Territoires en commun : les projets partagés"
+        dispositif() {
+            let dispositif;
+            switch (this.obs.dispositif) {
+                case "PPTDE":
+                    dispositif = "les projets partagés Territoires d'engagement"
                     break;  
-                case "TDE":
-                    demarche = "Territoires d'engagement : les parcours"
+                case "PATDE":
+                    dispositif = "les parcours d'accompagnement Territoires d'engagement"
                     break;  
                 case "CCO":
-                    demarche = "Territoires d'engagement : la cellule de conseil et d'orientation"
-                    break;  
+                    dispositif = "Territoires d'engagement : la cellule de conseil et d'orientation"
+                    break;
+                case "AI":
+                    dispositif = "Territoires d'engagement : les ateliers interactifs"
+                    break; 
             };
-            return demarche
+            return dispositif
         }
     }
 };
@@ -361,7 +342,7 @@ const LeafletSidebar = {
                     Carte interactive des
                 </span>
                 <h4>
-                    territoires en commun et<br>territoires d'engagement
+                    <br>territoires d'engagement
                 </h4>
                 <span class="leaflet-sidebar-close" @click="$emit('closeSidebar')">
                     <i class="la la-step-backward"></i>
@@ -390,7 +371,7 @@ const LeafletSidebar = {
                 </p>
                 <p>
                     <b>Réalisation  et maintenance de l'outil :</b>
-                    ANCT - <a href = 'https://cartotheque.anct.gouv.fr/cartes' target="_blank">Service cartographie</a>
+                    Pôle ADT - ANCT - <a href = 'https://cartotheque.anct.gouv.fr/cartes' target="_blank">Équipe cartographie</a>
                 </p>
                 <p>Technologies utilisées : Leaflet, Bootstrap, Vue.js 2.7</p>
                 <p>Le code source de cet outil est consultable sur <a href="https://www.github.com/anct-carto/engagement-citoyen" target="_blank">Github</a>.</p>
@@ -434,8 +415,8 @@ const LeafletSidebar = {
         getResult(result) {
             this.$emit('searchResult', result)
         },
-        emitLayerId(demarche) {
-            this.$emit("controlLayers",demarche)
+        emitLayerId(dispositif) {
+            this.$emit("controlLayers",dispositif)
         }
     },
 };
@@ -518,8 +499,8 @@ const LeafletMap = {
                     }
                 },
                 categories:{
-                    colors:['#039d7b','#f69000','#293173'],
-                    values:['TDE','TEC','CCO'],
+                    colors:['#039d7b','#f69000','#293173', '#ec6555'],
+                    values:['PATDE','PPTDE','CCO', 'AI'],
                     labels:[],
                 },
                 features:{
@@ -588,13 +569,16 @@ const LeafletMap = {
         pinLayer() {
             return L.layerGroup({ className: 'pin-layer' }).addTo(this.map);
         },
-        tecLayer() {
+        pptdeLayer() {
             return L.layerGroup({ className: 'points'}).addTo(this.map)
         },
-        tdeLayer() {
+        patdeLayer() {
             return L.layerGroup({ className: 'points'}).addTo(this.map)
         },
         ccoLayer() {
+            return L.layerGroup({ className: 'points'}).addTo(this.map)
+        },
+        aiLayer() {
             return L.layerGroup({ className: 'points'}).addTo(this.map)
         },
         labelLayer() {
@@ -624,9 +608,11 @@ const LeafletMap = {
         
         // création fenêtre de contrôle des couches
         L.control.layers(null,{
-            "Territoires en commun :<br>les projets partagés":this.tecLayer,
-            "Territoires d'engagement :<br>les parcours":this.tdeLayer,
+            "Territoires en commun :<br>les projets partagés":this.pptdeLayer,
+            "Territoires d'engagement :<br>les parcours":this.patdeLayer,
             "Territoires d'engagement :<br>la cellule de conseil et d'orientation":this.ccoLayer,
+            "Territoires d'engagement :<br>les ateliers interactifs":this.aiLayer,
+
             "Toponymes":this.labelLayer
         },{
             collapsed:true,
@@ -706,7 +692,7 @@ const LeafletMap = {
                     filter:(feature) => this.data.map(e=>e.codgeo).includes(feature.properties.codgeo),
                     pointToLayer: function (feature, latlng) {
                         let circleMarker = L.circleMarker(latlng, styleDefault);
-                        circleMarker.setStyle({fillColor:getColor(feature.properties.demarche)});
+                        circleMarker.setStyle({fillColor:getColor(feature.properties.dispositif)});
                         // circleMarker.bindTooltip(stylishTooltip(feature.properties),styleTooltipDefault);
                         return circleMarker
                     },
@@ -732,7 +718,7 @@ const LeafletMap = {
                     this.onClick(e.sourceTarget.feature.properties.codgeo)
                 }).on("mouseover", (e) => {
                     e.target.setStyle(this.styles.features.clicked)
-                    e.target.setStyle({fillColor:getColor(e.sourceTarget.feature.properties.demarche)})
+                    e.target.setStyle({fillColor:getColor(e.sourceTarget.feature.properties.dispositif)})
                 }).on("mouseout",(e) => {
                     e.target.setStyle({
                             radius:20,
@@ -742,18 +728,22 @@ const LeafletMap = {
                 });
 
                 // ajout au calque correspondant
-                switch (combined[i].properties.demarche) {
-                    case "TEC":
-                        marker.addTo(this.tecLayer);                        
-                        circleAnchor.addTo(this.tecLayer);                        
+                switch (combined[i].properties.dispositif) {
+                    case "PPTDE":
+                        marker.addTo(this.pptdeLayer);                        
+                        circleAnchor.addTo(this.pptdeLayer);                        
                         break;
-                    case "TDE":
-                        marker.addTo(this.tdeLayer);
-                        circleAnchor.addTo(this.tdeLayer);
+                    case "PATDE":
+                        marker.addTo(this.patdeLayer);
+                        circleAnchor.addTo(this.patdeLayer);
                         break;
                     case "CCO":
                         marker.addTo(this.ccoLayer);                        
                         circleAnchor.addTo(this.ccoLayer);                        
+                        break;
+                    case "AI":
+                        marker.addTo(this.aiLayer);                        
+                        circleAnchor.addTo(this.aiLayer);                        
                         break;
                 }
                 setTimeout(() => {
@@ -768,7 +758,7 @@ const LeafletMap = {
             
             // // envoie les infos de l'élément sélectionné au composant "fiche"
             let content = this.data.find(e => e.codgeo == code);
-            content.color = this.getColor(content.demarche)
+            content.color = this.getColor(content.dispositif)
             this.cardContent = content;
 
             // retrouve la géométrie
@@ -777,13 +767,13 @@ const LeafletMap = {
             // style à appliquer
             let glow = new L.circleMarker(coordsResult,this.styles.features.clicked).addTo(this.pinLayer);
             let circle = new L.circleMarker(coordsResult,this.styles.features.default).addTo(this.pinLayer);
-            circle.setStyle({fillColor:this.getColor(content.demarche)});
-            glow.setStyle({fillColor:this.getColor(content.demarche)});
+            circle.setStyle({fillColor:this.getColor(content.dispositif)});
+            glow.setStyle({fillColor:this.getColor(content.dispositif)});
 
             this.sidebar.open("home");
         },
         stylishTooltip(marker) {
-            return `<span style="background-color:${this.getColor(marker.demarche)}">${marker.libgeo}</span>`
+            return `<span style="background-color:${this.getColor(marker.dispositif)}">${marker.libgeo}</span>`
         },
         onSearchResultReception(result) {
             // simule un click sur le code de cette entité pour renvoyer la fiche correspondante
@@ -806,19 +796,23 @@ const LeafletMap = {
             })
             return color
         },
-        controlLayers(demarche) {
-            switch (demarche) {
-                case "TEC":
-                    [this.tecLayer,this.tdeLayer,this.ccoLayer].forEach(layer => layer.removeFrom(this.map));
-                    this.tecLayer.addTo(this.map);
+        controlLayers(dispositif) {
+            switch (dispositif) {
+                case "PPTDE":
+                    [this.pptdeLayer,this.patdeLayer,this.ccoLayer, this.aiLayer].forEach(layer => layer.removeFrom(this.map));
+                    this.pptdeLayer.addTo(this.map);
                     break;
-                case "TDE":
-                    [this.tecLayer,this.tdeLayer,this.ccoLayer].forEach(layer => layer.removeFrom(this.map));
-                    this.tdeLayer.addTo(this.map);
+                case "PATDE":
+                    [this.pptdeLayer,this.patdeLayer,this.ccoLayer, this.aiLayer].forEach(layer => layer.removeFrom(this.map));
+                    this.patdeLayer.addTo(this.map);
                     break;
                 case "CCO":
-                    [this.tecLayer,this.tdeLayer,this.ccoLayer].forEach(layer => layer.removeFrom(this.map));
+                    [this.pptdeLayer,this.patdeLayer,this.ccoLayer, this.aiLayer].forEach(layer => layer.removeFrom(this.map));
                     this.ccoLayer.addTo(this.map);                    
+                    break;
+                case "AI":
+                    [this.pptdeLayer,this.patdeLayer,this.ccoLayer, this.aiLayer].forEach(layer => layer.removeFrom(this.map));
+                    this.aiLayer.addTo(this.map);                    
                     break;
             }
         }
@@ -901,4 +895,3 @@ function svgText(txt) {
     return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><text x="0" y = "10">'
         + txt + '</text></svg>';
 }
-

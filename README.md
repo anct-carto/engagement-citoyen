@@ -2,17 +2,18 @@
 
 ![alt text](img/Capture.JPG)
 
-Page officielle : https://agence-cohesion-territoires.gouv.fr/territoires-dengagement-territoires-en-commun-528 
+Page officielle : https://anct.gouv.fr/programmes-dispositifs/territoires-d-engagement
 
-Lien direct : https://carto.pages.sit.incubateur.tech/engagement-citoyen
+Lien direct : https://cartes.anct.gouv.fr/engagement-citoyen/
 
 ## Présentation
 
 La carte interactive des territoires en commun et territoires d'engagement recense les territoires accompagnés par l'ANCT pour construire l'action publique locale avec et par les citoyens, au travers d'une offre de services
-matérialisée par trois types de démarches : 
-- les projets partagés Territoires en commun 
-- les parcours d'accompagement Territoires d'ngagement
-- le recours à la cellule de conseil et d'orientation Territoires d'engagement. 
+matérialisée par quatre types de démarches : 
+- la cellule de conseil et d'orientation Territoire d'engagement
+- les parcours d'accompagement Territoires d'engagement
+- les projets partagés Territoire d'engagement
+- les ateliers interactifs de l'ANCT 
 
 ## Fonctionnalités 
 
@@ -30,4 +31,4 @@ Cet outil, conçu et développé par le service cartographie de l'ANCT, a été 
 
 ## En savoir plus sur le programme
 
-Sur le site de ANCT : https://agence-cohesion-territoires.gouv.fr/territoires-dengagement-territoires-en-commun-528 
+Sur le site de ANCT : https://anct.gouv.fr/programmes-dispositifs/territoires-d-engagement
