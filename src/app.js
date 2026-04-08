@@ -1,6 +1,7 @@
 /*
     Carte interactive des territoires en commnun et territoires d'engagement
     Hassen Chougar / service cartographie - ANCT
+    MAJ Luna Pelchat - Décembre 2025
     dependances : Leaflet 1.0.8, vue 2.7, vue-router 4.0.5, bootstrap 5.1, papaparse 5.3.1
 */
 
